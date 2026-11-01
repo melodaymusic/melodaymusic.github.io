@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meloday Music</title>
+  <meta name="description" content="Meloday Music is a free Windows player for your Plex music library. It makes a new playlist for each part of the day, runs live stations from your music and mixes songs together like a DJ.">
+  <meta name="theme-color" content="#121114">
+  <meta property="og:title" content="Meloday Music">
+  <meta property="og:description" content="A Windows player for your Plex music library that changes with the time of day.">
+  <link rel="icon" href="assets/symbol.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/Nunito.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <div class="nav-bar">
+      <a class="brand" href="#top" aria-label="Meloday Music, back to top">
+        <svg class="brand-wave" viewBox="0 0 512 226" aria-hidden="true"><use href="#wave"/></svg>
+        <span>Meloday Music</span>
+      </a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#meloday">Meloday</a>
+        <a href="#mixes">Mixes</a>
+        <a href="#engine">Engine</a>
+        <a href="#automix">AutoMix</a>
+        <a href="#now-playing">Now Playing</a>
+        <a href="#features">All features</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <a class="button button-accent button-small" href="https://github.com/melodaymusic/app/releases/latest">Download</a>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">Free for Windows · For Plex music libraries</p>
+          <h1 id="hero-title">Your music,<br>mixed for the time&nbsp;of&nbsp;day.</h1>
+          <p class="lede">Meloday Music is a Windows player for the music you keep on Plex. It makes you a new playlist for each part of the day, runs live stations from your library and blends one song into the next like a DJ.</p>
+          <div class="actions">
+            <a class="button button-accent" href="https://github.com/melodaymusic/app/releases/latest">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Download for Windows
+            </a>
+            <a class="button button-quiet" href="#features">See every feature</a>
+          </div>
+          <p class="fineprint">Windows 10 or later · Works without Plex Pass · Open source</p>
+        </div>
+
+        <div class="hero-art">
+          <div class="cover cover-hero" id="hero-cover" role="img" aria-label="Meloday cover"></div>
+          <div class="dial">
+            <div class="dial-head">
+              <label for="hour">Move through the day</label>
+              <output id="hour-out" for="hour" aria-live="polite"></output>
+            </div>
+            <input id="hour" type="range" min="0" max="23" step="1" value="12">
+            <div class="dial-ticks" aria-hidden="true"><span>12 am</span><span>6 am</span><span>12 pm</span><span>6 pm</span><span>11 pm</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meloday -->
+    <section class="section" id="meloday" aria-labelledby="meloday-title">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Meloday</p>
+          <h2 id="meloday-title">A playlist that follows the clock</h2>
+          <p class="lede">Seven times a day, from dawn to late night, Meloday builds a fresh mix from the songs you tend to play at that hour. It names the mix after what's in it and draws a cover with the sun where it would sit in the sky.</p>
+        </div>
+        <ol class="day-strip" id="day-strip" aria-label="The seven parts of the day"></ol>
+        <ul class="facts">
+          <li><strong>Named from your music.</strong> Titles come from the genres, moods and eras in the mix, like "Fitted Pop Saturday Evening".</li>
+          <li><strong>Saved to Plex if you like.</strong> Keep it as one Plex playlist that updates in place, so Plexamp and your other apps see it too.</li>
+          <li><strong>Ready when you are.</strong> It's made a couple of seconds after the app starts and changes on its own as the day goes on.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Made for You -->
+    <section class="section" id="mixes" aria-labelledby="mixes-title">
+      <div class="wrap">
+        <div class="section-head split">
+          <div>
+            <p class="eyebrow">Made for You</p>
+            <h2 id="mixes-title">Mixes made from what you actually play</h2>
+            <p class="lede">Daily mixes of about 30 songs follow your listening. Every Monday brings mood, energy and moment playlists, Genre Essentials for the genres you play most, and niche mixes named in two words about the music.</p>
+          </div>
+          <button class="button button-quiet" type="button" id="reshuffle">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.97a4 4 0 0 0 3.3-1.7l5.45-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.97a4 4 0 0 1 3.3 1.7l.52.83"/><path d="M22 18h-6.04a4 4 0 0 1-3.3-1.8l-.52-.82"/></svg>
+            Redraw mix covers
+          </button>
+        </div>
+        <ul class="cover-grid" id="mix-grid" aria-label="Example Made for You playlists"></ul>
+        <ul class="facts">
+          <li><strong>Every mix keeps going.</strong> Artist, genre, mood and sound mixes top themselves up as they run low, without repeating what's already queued.</li>
+          <li><strong>Spread out on purpose.</strong> No artist twice within three songs, and songs Meloday has suggested a lot get a rest for a while.</li>
+          <li><strong>One song, counted once.</strong> The album version, the deluxe edition and the remaster are treated as the same song.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Stations -->
+    <section class="section" id="stations" aria-labelledby="stations-title">
+      <div class="wrap two-col">
+        <div>
+          <div class="cover live-cover" id="pulse-cover" role="img" aria-label="Meloday Pulse cover, with the M-wave moving across it"></div>
+          <p class="eyebrow">Live stations</p>
+          <h2 id="stations-title">Stations that are already playing</h2>
+          <p class="lede">Meloday's live stations keep running while you're away, so tuning in drops you in mid-song, the way radio does. Meloday Pulse follows a daily schedule of programmes built from your library.</p>
+          <p>Add your own programmes in the Pulse Guide. Schedule a song, artist, album, playlist, genre, mood or decade once, every day, on weekdays or on chosen days, for one song or an hour. And any song, album, artist, genre, style, mood or decade can start a radio of its own.</p>
+        </div>
+        <div class="guide" aria-labelledby="guide-title">
+          <div class="guide-head">
+            <div>
+              <h3 id="guide-title">Meloday Pulse</h3>
+              <p class="muted" id="guide-now"></p>
+              <div class="on-air-song">
+                <img src="assets/art/album-rihanna-loud.jpg" alt="">
+                <span><b>Only Girl (In The World)</b> Rihanna</span>
+              </div>
+            </div>
+          </div>
+          <ol class="guide-list" id="guide-list"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engine -->
+    <section class="section" id="engine" aria-labelledby="engine-title">
+      <div class="wrap two-col reverse">
+        <div>
+          <p class="eyebrow">Meloday Engine</p>
+          <h2 id="engine-title">It listens to your songs</h2>
+          <p class="lede">The Meloday Engine analyses your music on your own PC and learns how each song sounds. Then you can search for a sound instead of a title.</p>
+          <ul class="ticks">
+            <li>Describes songs with 112 words for mood, energy, genre, instruments, vocals and moments.</li>
+            <li>Powers Sonic Radio, similar songs and Sonic Adventure, which travels from one song you pick to another.</li>
+            <li>Learns the sound of what you finish and what you skip, with a separate taste for mornings and late nights.</li>
+            <li>Nothing leaves your PC, and you don't need Plex Pass. If you have it, Plex fills in for songs the engine hasn't heard yet.</li>
+          </ul>
+        </div>
+        <div class="engine" aria-labelledby="engine-demo-title">
+          <h3 class="visually-hidden" id="engine-demo-title">Sounds Like search example</h3>
+          <div class="search-field" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <span id="engine-query"></span><span class="caret"></span>
+          </div>
+          <div class="chips" role="group" aria-label="Example searches" id="engine-chips"></div>
+          <div class="hears" id="engine-hears" aria-live="polite"></div>
+          <div class="engine-foot">
+            <span class="pill-button" id="engine-create">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              <span></span>
+            </span>
+            <span class="muted small">Example matches. Yours depend on your library.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AutoMix -->
+    <section class="section" id="automix" aria-labelledby="automix-title">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">AutoMix</p>
+          <h2 id="automix-title">One song runs into the next</h2>
+          <p class="lede">AutoMix beat-matches the end of each song into the start of the next. Both songs meet halfway in tempo, so pairs up to about 21% apart still line up, and neither changes pitch.</p>
+        </div>
+        <figure class="mixer">
+          <canvas id="mix-canvas" role="img" aria-label="Diagram of an AutoMix transition over eight bars. The incoming song's highs arrive first, then its mids, then the bass swaps on the downbeat halfway through, and the outgoing song's mids and highs fade last."></canvas>
+          <figcaption>
+            <span class="key key-a"><img src="assets/art/album-lady-gaga-the-fame-monster-deluxe-edition.jpg" alt=""><span><b>Bad Romance</b> Lady Gaga. Eases from 119 to 121.5 BPM</span></span>
+            <span class="key key-b"><img src="assets/art/album-dua-lipa-future-nostalgia.jpg" alt=""><span><b>Don't Start Now</b> Dua Lipa. Starts at 121.5, eases back to 124</span></span>
+          </figcaption>
+        </figure>
+        <div class="three">
+          <div>
+            <h3>Highs, mids, then bass</h3>
+            <p>The next song's hi-hats come in first, then its mids. The bass lines swap on the downbeat halfway through, so two kick drums never fight.</p>
+          </div>
+          <div>
+            <h3>One voice at a time</h3>
+            <p>Where synced lyrics show singing, AutoMix lets one voice finish before the next begins. A vocal can ride over the next song's intro, then fade.</p>
+          </div>
+          <div>
+            <h3>A plan for every pair</h3>
+            <p>Songs too far apart to beat-match get a filter sweep, an echo out or a clean cut on a break. A look-ahead limiter keeps overlaps from distorting.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Now Playing -->
+    <section class="section" id="now-playing" aria-labelledby="np-title">
+      <div class="wrap two-col">
+        <div>
+          <p class="eyebrow">Now Playing</p>
+          <h2 id="np-title">Something to watch while it plays</h2>
+          <p class="lede">Now Playing fills the window with the artist's backdrop, synced lyrics and a choice of visualizers that move with the music.</p>
+          <ul class="ticks">
+            <li>Lyric videos, with each word arriving as it's sung, in a typeface picked for the song.</li>
+            <li>Bars, Pillars and Tiles, plus projectM with five MilkDrop presets.</li>
+            <li>Synced lyrics from LRCLIB or Plex. If they're off, fix them in Lyric Studio by tapping the space bar as each word begins.</li>
+          </ul>
+        </div>
+        <div class="stage-wrap">
+          <fieldset class="segmented" id="vis-picker">
+            <legend class="visually-hidden">Visualizer</legend>
+            <label><input type="radio" name="vis" value="bars" checked><span>Bars</span></label>
+            <label><input type="radio" name="vis" value="pillars"><span>Pillars</span></label>
+            <label><input type="radio" name="vis" value="tiles"><span>Tiles</span></label>
+            <label><input type="radio" name="vis" value="lyrics"><span>Lyrics</span></label>
+          </fieldset>
+          <div class="stage">
+            <img class="stage-backdrop" src="assets/art/backdrop-zara-larsson.jpg" alt="">
+            <canvas id="vis-canvas" aria-hidden="true"></canvas>
+            <div class="stage-meta real">
+              <img class="stage-art" src="assets/art/album-zara-larsson-so-good.jpg" alt="">
+              <div>
+                <p class="stage-title">Lush Life</p>
+                <p class="stage-artist">Zara Larsson</p>
+              </div>
+            </div>
+            <div class="stage-meta demo">
+              <div class="stage-art" aria-hidden="true"></div>
+              <div>
+                <p class="stage-title">Neon Weather</p>
+                <p class="stage-artist">Lyrics written for this demo</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Curators -->
+    <section class="section" id="curators" aria-labelledby="curators-title">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">Guest curators</p>
+          <h2 id="curators-title">Hand the queue to someone with opinions</h2>
+          <p class="lede">Pick a guest curator and it arranges whatever plays next, whether that's an album you queued or a radio that keeps going. Try one.</p>
+        </div>
+        <fieldset class="chooser" id="curator-picker">
+          <legend class="visually-hidden">Guest curator</legend>
+        </fieldset>
+        <div class="queue-panel">
+          <p class="queue-blurb" id="curator-blurb" aria-live="polite"></p>
+          <ol class="queue" id="queue" aria-label="Up next"></ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- Little things -->
+    <section class="section" id="details" aria-labelledby="details-title">
+      <div class="wrap">
+        <div class="section-head">
+          <p class="eyebrow">The little things</p>
+          <h2 id="details-title">Made by someone who uses it every day</h2>
+        </div>
+        <div class="details-grid">
+          <div class="trends" aria-labelledby="trends-title">
+            <h3 id="trends-title">Trends</h3>
+            <p>See your listening by artist, album, song, hour and weekday, with a calendar of every day you pressed play. Plays from Plexamp and your other Plex apps count too.</p>
+            <p class="trends-label">Top artists</p>
+            <ol class="top-artists" id="top-artists"></ol>
+            <div class="calendar" id="calendar" role="img" aria-label="Example listening calendar covering 26 weeks"></div>
+            <div class="hours" id="hours" role="img" aria-label="Example chart of listening by hour of the day"></div>
+          </div>
+          <ul class="smalls">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+              <div><h3>Sleep timer</h3><p>Stop after 15 minutes to 2 hours, or at the end of the song, with a gentle fade.</p></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 9V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h4"/><rect width="10" height="7" x="12" y="13" rx="2"/></svg>
+              <div><h3>Mini player</h3><p>A small window that stays on top. Ctrl+Shift+M opens it.</p></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="m22 9-6 6"/><path d="m16 9 6 6"/></svg>
+              <div><h3>Mute for a while</h3><p>Tired of a song or artist? Mute them for a week or a month and they come back on their own.</p></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 8V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-6"/><path d="M2 12a9 9 0 0 1 8 8"/><path d="M2 16a5 5 0 0 1 4 4"/><path d="M2 20h.01"/></svg>
+              <div><h3>Cast</h3><p>Play to Chromecast, Nest speakers, Sonos and DLNA devices. The song carries on where it was.</p></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              <div><h3>Downloads</h3><p>Keep songs, albums and playlists on your PC for when the server's out of reach.</p></div>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <div><h3>Plex Home profiles</h3><p>Everyone in your Plex Home gets their own history, taste, queue, pins and Meloday.</p></div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- All features -->
+    <section class="section" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <div class="section-head split">
+          <div>
+            <p class="eyebrow">Everything in the app</p>
+            <h2 id="features-title">All features</h2>
+            <p class="lede" id="feature-count"></p>
+          </div>
+          <div class="filter">
+            <label for="feature-filter" class="visually-hidden">Filter features</label>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input id="feature-filter" type="search" placeholder="Filter features" autocomplete="off" spellcheck="false">
+          </div>
+        </div>
+        <div class="feature-list" id="feature-list"></div>
+        <div class="empty" id="feature-empty" hidden>
+          <p>No features match "<span></span>".</p>
+          <button class="button button-quiet button-small" type="button" id="feature-clear">Clear filter</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap faq-grid">
+        <div>
+          <p class="eyebrow">FAQ</p>
+          <h2 id="faq-title">Questions people ask</h2>
+        </div>
+        <div class="faq">
+          <details>
+            <summary><span>Is there an iPhone or Android app?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>No, and there won't be. Plexamp already plays Plex music on phones and does it well, so a mobile version of Meloday Music wouldn't add anything.</p>
+          </details>
+          <details>
+            <summary><span>What about a Mac or Docker version?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>Those aren't planned either. I build Meloday Music around what I use every day, which is Plex on a Windows PC. I don't use a Mac, Android or Docker, so I couldn't make or test a version for them properly.</p>
+          </details>
+          <details>
+            <summary><span>Can someone else make one?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>Yes, please do. Meloday Music is open source under the GPL-3.0, so anyone is welcome to take the code to another platform. <a href="https://github.com/melodaymusic/app">The source is on GitHub</a>.</p>
+          </details>
+          <details>
+            <summary><span>Do I need Plex Pass?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>No. Everything works without it. If you have Plex Pass, Plex's own sonic analysis fills in for songs the Meloday Engine hasn't learned yet.</p>
+          </details>
+          <details>
+            <summary><span>Is it free?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>Yes, it's free and open source. If you'd like to support it, there's a <a href="https://ko-fi.com/dvdbsh">Ko-fi page</a>.</p>
+          </details>
+          <details>
+            <summary><span>Is it safe to install? Windows warned me about it.</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>The installer isn't code-signed yet, so Windows SmartScreen shows "Windows protected your PC" and an unknown publisher. It shows that for any unsigned app from a small developer, and it doesn't mean anything was found in the file. Select More info, then Run anyway. To check your download first, compare its SHA-256 hash with the one in the release notes. All of the source is <a href="https://github.com/melodaymusic/app">on GitHub</a> if you'd rather read it or build the app yourself.</p>
+          </details>
+          <details>
+            <summary><span>Does my listening count in Plex?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>Yes, if you want it to. Meloday reports what you play back to your Plex server, so your play counts and history stay up to date in Plexamp and everywhere else you use Plex, and the song shows in Now Playing while it's on. It's on by default. If you'd rather keep your listening to yourself, turn off Report listening to Plex in Settings.</p>
+          </details>
+          <details>
+            <summary><span>Does my music or listening history leave my PC?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>The Meloday Engine analyses your songs on your PC, and the skips and choices it learns from stay there too. Your plays go to your own Plex server unless you turn that off, and nothing goes to Last.fm or ListenBrainz unless you connect them. Sign-ins and keys are encrypted with Windows DPAPI.</p>
+          </details>
+          <details>
+            <summary><span>Will it change my files or my Plex library?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>It never touches your audio files. Apart from reporting your plays, which you can turn off, it only writes to Plex when you ask it to, like saving a playlist, keeping Meloday on Plex or tagging moods. Moods it added can be removed in one step, and each song goes back to how it was.</p>
+          </details>
+          <details>
+            <summary><span>Does it work with Spotify or Apple Music?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>No. It plays the music in your Plex library, and everything it makes comes from there.</p>
+          </details>
+          <details>
+            <summary><span>What do I need to run it?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>Windows 10 version 2004 or later on a 64-bit PC, and a Plex Media Server with a music library.</p>
+          </details>
+          <details>
+            <summary><span>Is it made by Plex?</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+            <p>No. Meloday Music is an independent project and isn't affiliated with or endorsed by Plex, Inc.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section class="section closing" id="download" aria-labelledby="download-title">
+      <div class="wrap">
+        <div class="closing-cover cover" id="closing-cover" aria-hidden="true"></div>
+        <h2 id="download-title">Free, open source, made by one person</h2>
+        <p class="lede">Meloday started as a small Python script shared with Plexamp listeners on Reddit. This app grew out of it, built in spare time by someone who wanted a Plex player for Windows they'd enjoy every day.</p>
+        <div class="actions center">
+          <a class="button button-accent" href="https://github.com/melodaymusic/app/releases/latest">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+            Download for Windows
+          </a>
+          <a class="button button-quiet" href="https://github.com/melodaymusic/app">Source on GitHub</a>
+          <a class="button button-quiet" href="https://ko-fi.com/dvdbsh">Support on Ko-fi</a>
+        </div>
+        <p class="fineprint">Needs Windows 10 version 2004 or later (x64) and a Plex Media Server with a music library.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-grid">
+      <p>Meloday Music is an independent project and isn't affiliated with or endorsed by Plex, Inc. Licensed under the GPL-3.0.</p>
+      <p>Set in Nunito (SIL Open Font License). Cover shapes from Shape Icons by SVGBackgrounds.com and shapes.gallery. Interface icons from Lucide.</p>
+      <p class="rights">Album artwork, artist photos, artist names and song titles shown on this page are the property of their respective owners. They appear here only to show how Meloday Music displays a Plex library, and their use doesn't imply any affiliation with or endorsement by the artists, their labels or rights holders. Lyrics in the lyric video demo were written for this page.</p>
+    </div>
+  </footer>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="wave" viewBox="0 0 512 226">
+      <path d="M260.5 160.15C262.33 157.9 262.38 155.04 263.22 152.41C265.97 143.76 268.45 134.98 271.12 126.25C273.2 119.43 275.29 112.57 277.55 105.74C286.21 79.65 293.58 49.32 322.2 38.75C327.17 36.91 332.82 35.820 338.17 36.05C343.16 36.26 348.81 37.79 353.32 39.83C359.9 42.79 365.74 47.2 370.53 52.63C382.03 65.64 386.73 83.07 393.63 98.55C397.25 106.69 400.89 118.2 409.24 122.92C417.3 127.47 426.51 126.08 435.5 126.1C452.8 126.14 470.21 125.44 487.5 126.06C500.79 126.53 511.98 138.83 510.82 152.19C509.95 162.18 503.35 171.57 493.41 174.2C487.6 175.74 480.8 174.83 474.83 174.83C466.83 174.83 458.83 174.83 450.83 174.83C437.82 174.83 422.96 176.29 410.17 174.63C384.49 171.3 366.2 154.19 354.25 132.23C347.04 118.97 343.46 103.91 336.5 90.71C333.71 92.13 332.81 97.67 331.91 100.45C329.56 107.65 327.31 115.1 324.8 122.28C315.81 147.910 311.32 175.42 298.35 199.54C290.64 213.88 276.14 225.74 258.83 224.62C239.82 223.39 227.29 210.84 219.24 194.58C217.35 190.76 216.39 186.59 214.78 182.74C209.97 171.19 207.52 158.18 204.82 146.03C200.76 127.72 196.3 109.52 191.36 91.48C189.3 83.98 185.53 65.89 181.5 60.07C177.43 65.53 170.35 86.45 167.88 93.75C165.23 101.55 161.53 109.25 158.27 116.82C146.33 144.55 132.06 165.89 101.16 173.67C87.57 177.1 72.08 175.33 58.17 175.33C50.83 175.33 43.5 175.35 36.17 175.33C21.89 175.28 6.5 175 2.22 157.89C-0.89 145.43 6.3 128.54 20.5 127.05C38.68 125.14 57.34 128.04 75.5 126.32C86.79 125.25 92.9 127.31 101.49 118.32C108.3 111.18 111.170 100.07 115.18 91.33C121.49 77.59 126.51 63.32 132.72 49.52C136.18 41.83 139.16 33.78 143.87 26.71C155.14 9.82 169.37 -3.8 191.75 2.45C210.14 7.58 220.75 26.22 227.17 42.67C236.23 65.88 242.91 90.06 248.84 114.3C251.18 123.86 253.29 133.52 255.82 143.03C257.29 148.57 257.76 155.05 260.5 160.15Z" fill="currentColor"/>
+    </symbol>
+  </svg>
+
+  <script src="script.js"></script>
+</body>
+</html>
