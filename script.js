@@ -1163,8 +1163,8 @@ function watchSections() {
 function reveal() {
   if (reduceMotion.matches) return;
   const items = document.querySelectorAll([
-    ".hero-copy > *", ".hero-art", ".section-head", ".two-col > *", ".theatre", ".np-facts > li", ".facts > li",
-    ".three > *", ".day-strip > li", ".cover-grid > li", ".details-grid > *", ".faq-grid > *", ".chooser", ".queue-panel",
+    ".hero-copy > *", ".hero-art", ".section-head", ".showcase > *", "#engine .engine", ".mixer", ".theatre", ".cards > li",
+    ".day-strip > li", ".cover-grid > li", ".details-grid > *", ".faq", ".chooser", ".queue-panel",
     ".closing .wrap > *",
   ].join(","));
   const io = new IntersectionObserver((entries) => entries.forEach((e) => {

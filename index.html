@@ -11,7 +11,7 @@
   <link rel="icon" href="assets/symbol.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icon.png">
   <link rel="preload" href="assets/DMSans.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="style.css?v=6">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -29,7 +29,7 @@
         <a href="#automix">AutoMix</a>
         <a href="#now-playing">Now Playing</a>
         <a href="#features">All features</a>
-        <a href="#faq">FAQ</a>
+        <a href="#speed-round">Speed Round</a>
       </nav>
       <a class="button button-accent button-small" href="https://github.com/melodaymusic/app/releases/latest">Download</a>
     </div>
@@ -41,7 +41,6 @@
       <div class="hero-glow" aria-hidden="true"></div>
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <p class="eyebrow">Free for Windows · For Plex music libraries</p>
           <h1 id="hero-title">Your music,<br>mixed for the time&nbsp;of&nbsp;day.</h1>
           <p class="lede">Meloday Music is a Windows player for the music you keep on Plex. It makes you a new playlist for each part of the day, runs live stations from your library and blends one song into the next like a DJ.</p>
           <div class="actions">
@@ -72,12 +71,11 @@
     <section class="section" id="meloday" aria-labelledby="meloday-title">
       <div class="wrap">
         <div class="section-head">
-          <p class="eyebrow">Meloday</p>
           <h2 id="meloday-title">A playlist that follows the clock</h2>
           <p class="lede">Seven times a day, from dawn to late night, Meloday builds a fresh mix from the songs you tend to play at that hour. It names the mix after what's in it and draws a cover with the sun where it would sit in the sky.</p>
         </div>
         <ol class="day-strip" id="day-strip" aria-label="The seven parts of the day"></ol>
-        <ul class="facts">
+        <ul class="cards">
           <li><h3>Named from your music</h3>Titles come from the genres, moods and eras in the mix, like "Fitted Pop Saturday Evening".</li>
           <li><h3>Saved to Plex if you like</h3>Keep it as one Plex playlist that updates in place, so Plexamp and your other apps see it too.</li>
           <li><h3>Ready when you are</h3>It's made a couple of seconds after the app starts and changes on its own as the day goes on.</li>
@@ -90,13 +88,12 @@
       <div class="wrap">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Made for You</p>
             <h2 id="mixes-title">Mixes made from what you actually play</h2>
             <p class="lede">Daily mixes of about 30 songs follow your listening. Every Monday brings mood, energy and moment playlists, Genre Essentials for the genres you play most, and niche mixes named in two words about the music.</p>
           </div>
         </div>
         <ul class="cover-grid" id="mix-grid" aria-label="Example Made for You playlists"></ul>
-        <ul class="facts">
+        <ul class="cards">
           <li><h3>Every mix keeps going</h3>Artist, genre, mood and sound mixes top themselves up as they run low, without repeating what's already queued.</li>
           <li><h3>Spread out on purpose</h3>No artist twice within three songs, and songs Meloday has suggested a lot get a rest for a while.</li>
           <li><h3>One song, counted once</h3>The album version, the deluxe edition and the remaster are treated as the same song.</li>
@@ -106,15 +103,13 @@
 
     <!-- Stations -->
     <section class="section" id="stations" aria-labelledby="stations-title">
-      <div class="wrap two-col">
-        <div>
-          <div class="cover live-cover" id="pulse-cover" role="img" aria-label="Meloday Pulse cover, with the M-wave moving across it"></div>
-          <p class="eyebrow">Live stations</p>
+      <div class="wrap">
+        <div class="section-head">
           <h2 id="stations-title">Stations that are already playing</h2>
-          <p class="lede">Meloday's live stations keep running while you're away, so tuning in drops you in mid-song, the way radio does. Meloday Pulse follows a daily schedule of programs built from your library.</p>
-          <p>The lineup is yours to change: move Pulse's programs to other times, drop the ones you skip, or add your own. Schedule a song, artist, album, playlist, genre, mood or decade once, every day, on weekdays or on chosen days, for one song or an hour.</p>
-          <p>Any song, album, artist, genre, style, mood or decade can start a radio of its own, too.</p>
+          <p class="lede">Meloday Pulse follows a daily schedule of programs built from your library and keeps playing while you're away, so tuning in drops you in mid-song, the way radio does.</p>
         </div>
+        <div class="showcase">
+          <div class="cover live-cover" id="pulse-cover" role="img" aria-label="Meloday Pulse cover, with the M-wave moving across it"></div>
         <div class="guide" aria-labelledby="guide-title">
           <div class="guide-head">
             <div>
@@ -128,23 +123,21 @@
           </div>
           <ol class="guide-list" id="guide-list"></ol>
         </div>
+        </div>
+        <ul class="cards">
+          <li><h3>A lineup you can change</h3><p>Move programs to other times, drop the ones you skip, or add your own: a song, artist, album, playlist, genre, mood or decade, once, every day or on chosen days.</p></li>
+          <li><h3>A radio for anything</h3><p>Any song, album, artist, genre, style, mood or decade can start a station of its own.</p></li>
+          <li><h3>Programs from your library</h3><p>Morning Pulse, New Music, Chart Pulse, Then &amp; Now and the rest are built from what you actually play.</p></li>
+        </ul>
       </div>
     </section>
 
     <!-- Engine -->
     <section class="section" id="engine" aria-labelledby="engine-title">
-      <div class="wrap two-col reverse">
-        <div>
-          <p class="eyebrow">Meloday Engine</p>
+      <div class="wrap">
+        <div class="section-head">
           <h2 id="engine-title">It listens to your songs</h2>
           <p class="lede">The Meloday Engine analyses your music on your own PC and learns how each song sounds. Then you can search for a sound instead of a title.</p>
-          <ul class="ticks">
-            <li>Describes songs with 112 words for mood, energy, genre, instruments, vocals and moments.</li>
-            <li>Powers Sonic Radio, similar songs and Sonic Adventure, which travels from one song you pick to another.</li>
-            <li>Sorts any playlist into Sonic order, so each song leads into the next by tempo, key and energy.</li>
-            <li>Learns the sound of what you finish and what you skip, with a separate taste for mornings and late nights.</li>
-            <li>Nothing leaves your PC, and you don't need Plex Pass. If you have it, Plex fills in for songs the engine hasn't heard yet.</li>
-          </ul>
         </div>
         <div class="engine" aria-labelledby="engine-demo-title">
           <h3 class="visually-hidden" id="engine-demo-title">Sounds Like search example</h3>
@@ -162,6 +155,12 @@
             <span class="muted small">Example matches. Yours depend on your library.</span>
           </div>
         </div>
+        <ul class="cards">
+          <li><h3>112 words for a sound</h3><p>Every song is described by mood, energy, genre, instruments, vocals and moments.</p></li>
+          <li><h3>Sonic everything</h3><p>It powers Sonic Radio, similar songs, Sonic order and Sonic Adventure, which travels from one song you pick to another.</p></li>
+          <li><h3>Learns what you skip</h3><p>It hears what you finish and what you skip, with a separate taste for mornings and late nights.</p></li>
+          <li><h3>Stays on your PC</h3><p>Nothing leaves your computer and you don't need Plex Pass. If you have it, Plex fills in for songs the engine hasn't heard yet.</p></li>
+        </ul>
       </div>
     </section>
 
@@ -169,7 +168,6 @@
     <section class="section" id="automix" aria-labelledby="automix-title">
       <div class="wrap">
         <div class="section-head">
-          <p class="eyebrow">AutoMix</p>
           <h2 id="automix-title">One song runs into the next</h2>
           <p class="lede">AutoMix beat-matches the end of each song into the start of the next. Both songs meet halfway in tempo, so pairs up to about 21% apart still line up, and neither changes pitch.</p>
         </div>
@@ -180,28 +178,27 @@
             <span class="key key-b"><img src="assets/art/album-disclosure-settle-deluxe-version.jpg" alt=""><span><b>Latch</b> Disclosure. Starts at 122.5, eases back to 122</span></span>
           </figcaption>
         </figure>
-        <div class="three">
-          <div>
+        <ul class="cards">
+          <li>
             <h3>Highs, mids, then bass</h3>
             <p>The next song's hi-hats come in first, then its mids. The bass lines swap on the downbeat halfway through, so two kick drums never fight.</p>
-          </div>
-          <div>
+          </li>
+          <li>
             <h3>One voice at a time</h3>
             <p>Where synced lyrics show singing, AutoMix lets one voice finish before the next begins. A vocal can ride over the next song's intro, then fade.</p>
-          </div>
-          <div>
+          </li>
+          <li>
             <h3>A plan for every pair</h3>
             <p>Songs too far apart to beat-match get a filter sweep, an echo out or a clean cut on a break. A look-ahead limiter keeps overlaps from distorting.</p>
-          </div>
-        </div>
+          </li>
+        </ul>
       </div>
     </section>
 
     <!-- Now Playing -->
     <section class="section" id="now-playing" aria-labelledby="np-title">
       <div class="wrap">
-        <div class="section-head center">
-          <p class="eyebrow">Now Playing</p>
+        <div class="section-head">
           <h2 id="np-title">Something to watch while it plays</h2>
           <p class="lede">Now Playing fills the window with the artist's backdrop, synced lyrics and visualizers that take their colour from the album cover and move with the beat.</p>
         </div>
@@ -239,7 +236,7 @@
             <label><input type="radio" name="vis" value="lyrics"><span>Lyrics</span></label>
           </fieldset>
         </div>
-        <ul class="np-facts">
+        <ul class="cards">
           <li><h3>Lyric videos</h3><p>Each word arrives as it's sung, in a typeface picked for the song.</p></li>
           <li><h3>Ten visualizers</h3><p>From Bars and Halo to Bloom, Light Wall and Retrowave, plus five MilkDrop presets through projectM.</p></li>
           <li><h3>Lyric Studio</h3><p>Synced lyrics come from LRCLIB or Plex. If they're off, tap the space bar as each word begins to fix them.</p></li>
@@ -251,7 +248,6 @@
     <section class="section" id="curators" aria-labelledby="curators-title">
       <div class="wrap">
         <div class="section-head">
-          <p class="eyebrow">Guest curators</p>
           <h2 id="curators-title">Hand the queue to someone with opinions</h2>
           <p class="lede">Pick a guest curator and it arranges whatever plays next, whether that's an album you queued or a radio that keeps going. Try one.</p>
         </div>
@@ -269,7 +265,6 @@
     <section class="section" id="details" aria-labelledby="details-title">
       <div class="wrap">
         <div class="section-head">
-          <p class="eyebrow">The little things</p>
           <h2 id="details-title">Made by someone who uses it every day</h2>
         </div>
         <div class="details-grid">
@@ -316,7 +311,6 @@
       <div class="wrap">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Everything in the app</p>
             <h2 id="features-title">All features</h2>
             <p class="lede" id="feature-count"></p>
           </div>
@@ -326,11 +320,11 @@
     </section>
 
     <!-- FAQ -->
-    <section class="section" id="faq" aria-labelledby="faq-title">
-      <div class="wrap faq-grid">
-        <div>
-          <p class="eyebrow">FAQ</p>
-          <h2 id="faq-title">Questions people ask</h2>
+    <section class="section" id="speed-round" aria-labelledby="speed-round-title">
+      <div class="wrap">
+        <div class="section-head">
+          <h2 id="speed-round-title">Speed Round!</h2>
+          <p class="lede">Nobody's asked these yet, but someone will.</p>
         </div>
         <div class="faq">
           <details>
@@ -422,6 +416,6 @@
     </symbol>
   </svg>
 
-  <script src="script.js?v=6"></script>
+  <script src="script.js?v=8"></script>
 </body>
 </html>
