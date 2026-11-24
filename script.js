@@ -61,11 +61,11 @@ function paintSun(el, period) {
   el.querySelectorAll(".ring").forEach((ring, i) => { ring.style.fill = hex(period.rings[i]); ring.style.opacity = period.opacity[i]; });
 }
 
-// Shrink the name until it fits four lines, as the app's CoverFit does.
+// Shrink the name until it fits three lines, as the app's CoverFit does.
 function setName(el, text) {
   const name = $(".name", el);
   name.textContent = text;
-  fitText(name, 10, 1, 4);
+  fitText(name, 8.5, 1, 3);
 }
 
 const measure = document.createElement("canvas").getContext("2d");
@@ -79,7 +79,7 @@ function fitText(node, usual, lineRatio, maxLines) {
   node.style.maxHeight = "none";
   const fits = () => {
     const px = parseFloat(getComputedStyle(node).fontSize);
-    measure.font = `${weight} ${px}px Nunito`;
+    measure.font = `${weight} ${px}px "DM Sans"`;
     if (words.some((w) => measure.measureText(w).width > node.clientWidth + 0.5)) return false;
     const height = node.offsetHeight;
     return height <= box + 1 && Math.round(height / (px * lineRatio)) <= maxLines;
@@ -141,7 +141,7 @@ function buildStrip() {
   sunCover($("#closing-cover"), current, current.mix);
 }
 
-/* ---------- Shape covers, after ShapeLayout.cs ---------- */
+/* ---------- Mix covers, after MixCover.cs ---------- */
 
 const FAMILIES = [
   [0xF57387, 0xDC143C, 0x960A28], [0xF05F7D, 0xBE0A37, 0x780523], [0xFDA58C, 0xEE5005, 0xA52D19],
@@ -152,72 +152,37 @@ const FAMILIES = [
   [0xFFA5DC, 0xE11487, 0x960A55], [0xFFC3E1, 0xFF80B9, 0xB43C73],
 ];
 
-const SHAPES = [
-  { round: true, d: "M437.3 158.3A99.5 99.5 0 0 0 321.6 42.8a99.5 99.5 0 0 0-163.4 0A99.5 99.5 0 0 0 42.7 158.3a99.5 99.5 0 0 0 0 163.4 99.5 99.5 0 0 0 115.6 115.6 99.5 99.5 0 0 0 163.4 0 99.5 99.5 0 0 0 115.5-115.6 99.5 99.5 0 0 0 0-163.4Z" },
-  { round: false, d: "M480 240H0a240 240 0 1 1 480 0ZM480 480H0a240 240 0 1 1 480 0Z" },
-  { round: true, d: "M480 240a240 240 0 0 0-240 240 240 240 0 0 0 240-240ZM240 0A240 240 0 0 0 0 240 240 240 0 0 0 240 0ZM480 240A240 240 0 0 0 240 0a240 240 0 0 0 240 240ZM240 480A240 240 0 0 0 0 240a240 240 0 0 0 240 240Z" },
-  { round: true, d: "M347.5 168.3C324 184 296 156 311.7 132.5 348.8 76.8 310.7 0 239.2 0s-108.6 75.8-70.9 132.5C184 156 156 184 132.5 168.3A85.2 85.2 0 0 0 0 239.2v1.6c0 68 75.8 108.6 132.5 70.9C156 296 184 324 168.3 347.6A85.2 85.2 0 0 0 239.2 480h1.6c68 0 108.6-75.8 70.9-132.5C296 324 324 296 347.6 311.7c55.6 37.1 132.4-1 132.4-72.5s-75.8-108.6-132.5-70.9Z" },
-  { round: false, d: "M320 0v240a160 160 0 1 0-320 0v240h160V240a160 160 0 1 0 320 0V0H320Z" },
-  { round: false, d: "M480 240c0-21.9-11.7-42.4-32.1-60 20.4-17.6 32.1-38.1 32.1-60C480 53.7 372.6 0 240 0S0 53.7 0 120c0 21.9 11.7 42.4 32.1 60C11.7 197.7 0 218.1 0 240s11.7 42.4 32.1 60C11.7 317.6 0 338.1 0 360c0 66.3 107.5 120 240 120s240-53.7 240-120c0-21.9-11.7-42.4-32.1-60 20.4-17.6 32.1-38.1 32.1-60Z" },
-  { round: true, d: "M480 240c0-29.1-20.7-55.8-55.2-76.5 9.7-39.1 5.5-72.6-15-93.2-20.7-20.6-54.2-24.8-93.3-15.1C295.8 20.7 269.1 0 240 0s-55.8 20.7-76.5 55.2c-39.1-9.7-72.6-5.5-93.2 15s-24.8 54.2-15.1 93.2C20.7 184.3 0 211 0 240s20.7 55.8 55.2 76.5c-9.7 39.1-5.5 72.6 15 93.2 20.7 20.6 54.2 24.8 93.2 15.1C184.3 459.3 211 480 240 480s55.8-20.7 76.5-55.2c39.1 9.7 72.6 5.5 93.2-15s24.8-54.2 15.1-93.2C459.3 295.8 480 269 480 240Z" },
-  { round: true, d: "M409.7 296.6 353.1 240l56.6-56.6A80 80 0 0 0 296.6 70.3L240 126.9l-56.6-56.6A80 80 0 0 0 70.3 183.4l56.6 56.6-56.6 56.6a80 80 0 0 0 113.1 113.1l56.6-56.6 56.6 56.6a80 80 0 0 0 113.1-113.1Z" },
-  { round: true, d: "M240 6 47.5 98.7 0 307l133.2 167h213.6L480 307 432.5 98.7 240 6z" },
-  { round: false, d: "M360.5 240V120.5H240V0H0v240h120.5v120.5H240V480h240V240H360.5z" },
-  { round: false, d: "M480 0H120v120h120v120h120v120h120V0zM0 480h360V360H240V240H120V120H0v360z" },
-  { round: true, d: "M450 210A180 180 0 0 1 270 30a30 30 0 1 0-60 0A180 180 0 0 1 30 210a30 30 0 1 0 0 60 180 180 0 0 1 180 180 30 30 0 1 0 60 0 180 180 0 0 1 180-180 30 30 0 1 0 0-60Z" },
-];
+// MixCircles.OrbitSlots: the main picture, then two smaller ones ringed in the ground colour.
+const ORBIT = [[0.5, 0.42, 0.54], [0.2, 0.29, 0.25], [0.82, 0.61, 0.27]];
+const RING = 16;
+let clipId = 0;
+// Names are fitted once the cover has a size, and again whenever it changes.
+const nameFit = new ResizeObserver((entries) => entries.forEach((e) => {
+  const name = $(".name", e.target);
+  if (name && e.contentRect.width) fitText(name, 8.5, 1, 3);
+}));
 
-function overlap(a, b) {
-  const w = Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1), h = Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1);
-  return w > 0 && h > 0 ? w * h : 0;
-}
-const box = (cx, cy, s) => ({ x1: cx - s / 2, y1: cy - s / 2, x2: cx + s / 2, y2: cy + s / 2 });
-const area = (b) => (b.x2 - b.x1) * (b.y2 - b.y1);
-const COVER = { x1: 0, y1: 0, x2: 1000, y2: 1000 };
-
-function shapeCover(el, name, family, seed) {
-  const r = rng(name + seed);
-  const fam = FAMILIES[family];
-  const field = luminance(fam[1]) <= 0.3 ? 1 : 2;
-  const bars = field === 1 ? 2 : 1;
-  const [colourBack, colourFront] = [fam[0], fam[bars]];
-
-  const lines = Math.ceil(name.length / 14);
-  const label = { x1: 100, y1: 900 - lines * 96 - 20, x2: 880, y2: 910 };
-  const pick = () => Math.floor(r() * SHAPES.length);
-  const a = pick(); let b = pick(); while (b === a) b = pick();
-
-  let best = null;
-  for (let i = 0; i < 400; i++) {
-    const s1 = 520 + r() * 230, s2 = 400 + r() * Math.max(10, s1 - 470);
-    const p1 = [r() * 1000, r() * 760], p2 = [r() * 1000, r() * 760];
-    const b1 = box(...p1, s1), b2 = box(...p2, s2);
-    const off1 = 1 - overlap(b1, COVER) / area(b1), off2 = 1 - overlap(b2, COVER) / area(b2);
-    const both = overlap(b1, b2) / area(b2);
-    const onLabel = (overlap(b1, label) + overlap(b2, label)) / area(label);
-    let score = Math.max(0, off1 - 0.4) * 9 + Math.max(0, off2 - 0.4) * 9 + Math.max(0, both - 0.5) * 6 + Math.max(0, onLabel - 0.1) * 12;
-    score += Math.abs(p1[0] - p2[0]) < 200 && Math.abs(p1[1] - p2[1]) < 200 ? 0.4 : 0;
-    if (!best || score < best.score) best = { score, s1, s2, p1, p2 };
-  }
-
-  let turned = false;
-  const shapeSvg = (index, size, [cx, cy], colour) => {
-    const shape = SHAPES[index];
-    const rot = shape.round ? Math.round(r() * 24) * 15 : Math.round(r() * 4) * 90;
-    let cls = "swell", style = `--d:${(6 + r() * 5).toFixed(1)}s`;
-    if (shape.round && !turned) { turned = true; cls = "turn"; style = `--d:${(50 + r() * 30).toFixed(0)}s;--dir:${r() < 0.5 ? "normal" : "reverse"}`; }
-    return `<g transform="translate(${cx.toFixed(0)} ${cy.toFixed(0)}) rotate(${rot}) scale(${(size / 480).toFixed(3)}) translate(-240 -240)">` +
-      `<path class="shape ${cls}" style="${style}" d="${shape.d}" fill="${hex(colour)}"/></g>`;
+function mixCover(el, mix, seed) {
+  const r = rng(mix.name + seed);
+  const [, edge, ground] = FAMILIES[mix.family];
+  const [main, ...rest] = mix.pictures;
+  const orbit = rest.map((p) => [r(), p]).sort((a, b) => a[0] - b[0]).slice(0, 2).map(([, p]) => p);
+  const circle = ([x, y, d], picture, i) => {
+    const cx = x * 1000, cy = y * 1000, outer = d * 500, inner = i ? outer - RING : outer, id = "mc" + clipId++;
+    const motion = i ? ` class="orbit" style="--d:${(7 + r() * 4).toFixed(1)}s;--dx:${(r() * 16 - 8).toFixed(0)}px;--dy:${(r() * 16 - 8).toFixed(0)}px"` : "";
+    return `<g${motion}>${i ? `<circle cx="${cx}" cy="${cy}" r="${outer}" fill="${hex(ground)}"/>` : ""}` +
+      `<clipPath id="${id}"><circle cx="${cx}" cy="${cy}" r="${inner}"/></clipPath>` +
+      `<image href="${art(picture)}" x="${cx - inner}" y="${cy - inner}" width="${inner * 2}" height="${inner * 2}" clip-path="url(#${id})" preserveAspectRatio="xMidYMid slice"/></g>`;
   };
-
   el.innerHTML =
-    `<svg viewBox="0 0 1000 1000" aria-hidden="true"><rect width="1000" height="1000" fill="${hex(fam[field])}"/>` +
-    shapeSvg(a, best.s1, best.p1, colourBack) + shapeSvg(b, best.s2, best.p2, colourFront) +
-    `<rect y="964" width="1000" height="36" fill="${hex(fam[bars])}"/><rect y="760" width="18" height="120" fill="${hex(fam[bars])}"/></svg>` +
-    WAVE + `<div class="label"></div>`;
-  const labelEl = $(".label", el);
-  labelEl.textContent = name;
-  fitText(labelEl, 8.8, 1.09, 3);
+    `<svg viewBox="0 0 1000 1000" aria-hidden="true"><rect width="1000" height="1000" fill="${hex(ground)}"/>` +
+    [main, ...orbit].map((p, i) => circle(ORBIT[i], p, i)).join("") +
+    `<rect y="964" width="1000" height="36" fill="${hex(edge)}"/><rect y="760" width="18" height="120" fill="${hex(edge)}"/></svg>` +
+    WAVE + `<div class="label">${mix.radio ? "Radio" : "Mix"}</div><div class="name"></div>`;
+  const name = $(".name", el);
+  name.textContent = mix.name.replace(/ Mix$/, "");
+  if (el.clientWidth) fitText(name, 8.5, 1, 3);
+  nameFit.observe(el);
 }
 
 const MIXES = [
@@ -225,24 +190,21 @@ const MIXES = [
   { made: "road-trip", name: "Road Trip", sub: "MARINA, Ciara, aespa and more" },
   { made: "rainy-day", name: "Rainy Day", sub: "Laufey, Sam Smith, Haroula Rose and more" },
   { made: "feel-good", name: "Feel Good", sub: "Lady Gaga, Ozuna, Davido and more" },
-  { name: "R&B Deep Cuts", sub: "Niche mix" },
-  { name: "Dreamy Synth-Pop", sub: "Your Sounds" },
-  { name: "2000s Pop", sub: "Niche mix" },
-  { name: "Melodic House Mix", sub: "Genre mix" },
+  { name: "R&B Deep Cuts", sub: "Niche mix", family: 12, pictures: ["SZA|SOS", "Frank Ocean|channel ORANGE", "Kali Uchis|Red Moon In Venus", "The Weeknd|House Of Balloons (Original)"] },
+  { name: "Dreamy Synth-Pop", sub: "Your Sounds", family: 15, pictures: ["Lorde|Melodrama", "Carly Rae Jepsen|E•mo•tion (Deluxe Expanded Edition)", "Troye Sivan|Bloom", "Tove Lo|Dirt Femme"] },
+  { name: "2000s Pop", sub: "Niche mix", family: 10, pictures: ["Britney Spears|In The Zone", "Rihanna|Good Girl Gone Bad: Reloaded", "Lady Gaga|The Fame Monster (Deluxe Edition)", "Britney Spears|Circus (Deluxe Version)"] },
+  { name: "Dua Lipa Mix", sub: "Artist mix", family: 0, pictures: ["photo|Dua Lipa", "photo|Lady Gaga", "photo|Charli xcx", "photo|Sabrina Carpenter"] },
 ];
 let mixSeed = 0;
 
 function buildMixes() {
-  const r = rng("families" + mixSeed);
-  const order = FAMILIES.map((_, i) => i).sort(() => r() - 0.5);
   const grid = $("#mix-grid");
   if (!grid.children.length) {
     grid.innerHTML = MIXES.map((m) => `
       <li><div class="cover${m.made ? " photo" : ""}" role="img" aria-label="${m.name} cover">${m.made ? `<img src="${art("made|" + m.made)}" alt="" loading="lazy">` : ""}</div>
       <p class="title">${m.name}</p><p class="sub">${m.made ? "Made by Meloday · " + m.sub : m.sub}</p></li>`).join("");
   }
-  let shape = 0;
-  [...grid.children].forEach((li, i) => { if (!MIXES[i].made) shapeCover($(".cover", li), MIXES[i].name, order[shape++], mixSeed); });
+  [...grid.children].forEach((li, i) => { if (!MIXES[i].made) mixCover($(".cover", li), MIXES[i], mixSeed); });
 }
 
 $("#reshuffle").addEventListener("click", () => {
@@ -468,7 +430,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath(); ctx.roundRect(x, y, w, h, r);
 }
 
-const FONT = '"Nunito", "Segoe UI", sans-serif';
+const FONT = '"DM Sans", "Segoe UI", sans-serif';
 
 /* ---------- AutoMix diagram ---------- */
 
@@ -615,7 +577,7 @@ function buildVisualizer() {
     let index = LYRICS.findLastIndex(([at]) => local >= at);
     const [at, line] = LYRICS[index];
     const size = Math.max(26, Math.min(w * 0.072, 58));
-    ctx.font = `900 ${size}px ${FONT}`; ctx.textBaseline = "alphabetic";
+    ctx.font = `800 ${size}px ${FONT}`; ctx.textBaseline = "alphabetic";
     const words = line.split(" "), maxW = w - 56;
     const lines = [[]]; let width = 0;
     words.forEach((word, i) => {
@@ -799,9 +761,10 @@ const FEATURES = [
   ["Radio and stations", [
     "Radio from any song, album, artist, genre, style, mood or decade",
     "Live stations that keep playing while you're away, so you join mid-song",
-    "Meloday Pulse, a station with a daily schedule of programmes",
-    "Pulse Guide for scheduling your own programmes once, daily, on weekdays, at weekends or on chosen days",
-    "Programmes that last one song, a number of songs or a number of minutes",
+    "Meloday Pulse, a station with a daily schedule of programs",
+    "Pulse Guide for scheduling your own programs once, daily, on weekdays, at weekends or on chosen days",
+    "Change Pulse's own lineup: move a program, change its days or take it out",
+    "Programs that last one song, a number of songs or a number of minutes",
     "Sonic Radio, which follows the sound of a song",
     "Sonic Adventure, which travels from one song you pick to another",
   ]],
@@ -825,6 +788,8 @@ const FEATURES = [
     "Look-ahead limiter so overlapping songs don't distort",
     "Crossfade with a length you choose",
     "Guest curators: Double Up, Twin, Drift, Time Machine, Smooth and Spread",
+    "Sonic order for playlists, so each song leads into the next by tempo, key and energy",
+    "Play and Shuffle follow the sort or search you have on a playlist",
     "Bridge, which fills jumps in sound with songs that lead from one to the next",
     "Cast to Google Cast devices and UPnP/DLNA speakers and TVs, including Sonos",
     "Downloads for offline listening",
@@ -839,12 +804,13 @@ const FEATURES = [
     "Synced lyrics from LRCLIB or Plex",
     "Lyric Studio for timing lyrics yourself with the space bar",
     "Lyric videos, with each word arriving as it's sung",
-    "Bars, Pillars and Tiles visualizers",
+    "Visualizers: Bars, Halo, M-Wave, Sun, Pillars, Tiles, Ribbons, Light Wall, Bloom and Retrowave",
     "projectM with five MilkDrop presets",
   ]],
   ["Library", [
     "Albums, artists, songs, playlists, collections and folders",
     "Grid and list views",
+    "Move a genre, style or mood into another family from its right-click menu",
     "A Home page you arrange yourself, with rails like On Repeat, Forgotten Favourites, New in Your Rotation and Your Decade",
     "Pins in the sidebar, in any order you drag them",
     "Artist pages with backdrops, logos, biographies and top songs",
@@ -924,7 +890,7 @@ function watchSections() {
   document.querySelectorAll(".cover").forEach((c) => covers.observe(c));
 }
 
-Promise.all([document.fonts.load("900 16px Nunito"), document.fonts.load("700 16px Nunito"), document.fonts.ready]).then(() => {
+Promise.all([document.fonts.load("800 16px \"DM Sans\""), document.fonts.load("700 16px \"DM Sans\""), document.fonts.ready]).then(() => {
   setHour(+hourInput.value, true);
   buildStrip();
   buildMixes();
