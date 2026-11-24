@@ -4,7 +4,7 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const $ = (s, el = document) => el.querySelector(s);
 const hex = (n) => "#" + n.toString(16).padStart(6, "0");
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const ART = {"Zara Larsson|So Good": "album-zara-larsson-so-good", "Zara Larsson|Midnight Sun": "album-zara-larsson-midnight-sun", "Britney Spears|In The Zone": "album-britney-spears-in-the-zone", "Britney Spears|Circus (Deluxe Version)": "album-britney-spears-circus-deluxe-version", "Rihanna|Good Girl Gone Bad: Reloaded": "album-rihanna-good-girl-gone-bad-reloaded", "Rihanna|Loud": "album-rihanna-loud", "Lady Gaga|The Fame Monster (Deluxe Edition)": "album-lady-gaga-the-fame-monster-deluxe-edition", "Lady Gaga|MAYHEM": "album-lady-gaga-mayhem", "Ariana Grande|thank u, next": "album-ariana-grande-thank-u-next", "Ariana Grande|Dangerous Woman": "album-ariana-grande-dangerous-woman", "Dua Lipa|Dua Lipa (Deluxe)": "album-dua-lipa-dua-lipa-deluxe", "Dua Lipa|Future Nostalgia": "album-dua-lipa-future-nostalgia", "Sabrina Carpenter|Short n' Sweet": "album-sabrina-carpenter-short-n-sweet", "Sabrina Carpenter|emails i can't send": "album-sabrina-carpenter-emails-i-can-t-send", "SZA|SOS": "album-sza-sos", "Frank Ocean|channel ORANGE": "album-frank-ocean-channel-orange", "The Weeknd|House Of Balloons (Original)": "album-the-weeknd-house-of-balloons-original", "Kylie Minogue|Tension (Deluxe)": "album-kylie-minogue-tension-deluxe", "Carly Rae Jepsen|E•mo•tion (Deluxe Expanded Edition)": "album-carly-rae-jepsen-emotion-deluxe-expanded-edition", "Billie Eilish|WHEN WE ALL FALL ASLEEP, WHERE DO WE GO?": "album-billie-eilish-when-we-all-fall-asleep-where-do-w", "Olivia Rodrigo|SOUR": "album-olivia-rodrigo-sour", "Lorde|Melodrama": "album-lorde-melodrama", "Troye Sivan|Bloom": "album-troye-sivan-bloom", "The Weeknd|After Hours (Deluxe)": "album-the-weeknd-after-hours-deluxe", "Nicki Minaj|Pink Friday 2": "album-nicki-minaj-pink-friday-2", "Beyoncé|4": "album-beyonce-4", "Taylor Swift|reputation": "album-taylor-swift-reputation", "Charli xcx|Brat and it’s completely different but also still brat": "album-charli-xcx-brat-and-its-completely-different-but", "Doja Cat|Planet Her": "album-doja-cat-planet-her", "Tove Lo|Dirt Femme": "album-tove-lo-dirt-femme", "Lana Del Rey|Did you know that there's a tunnel under Ocean Blvd": "album-lana-del-rey-did-you-know-that-there-s-a-tunnel-", "Kali Uchis|Red Moon In Venus": "album-kali-uchis-red-moon-in-venus", "Chappell Roan|The Rise and Fall of a Midwest Princess": "album-chappell-roan-the-rise-and-fall-of-a-midwest-pri", "Tyla|TYLA": "album-tyla-tyla", "photo|Nicki Minaj": "artist-nicki-minaj", "photo|Zara Larsson": "artist-zara-larsson", "photo|Ariana Grande": "artist-ariana-grande", "photo|Tove Lo": "artist-tove-lo", "photo|Lana Del Rey": "artist-lana-del-rey", "photo|Dua Lipa": "artist-dua-lipa", "photo|Lady Gaga": "artist-lady-gaga", "photo|Sabrina Carpenter": "artist-sabrina-carpenter", "photo|The Weeknd": "artist-the-weeknd", "photo|SZA": "artist-sza", "photo|Rihanna": "artist-rihanna", "photo|Charli xcx": "artist-charli-xcx", "backdrop|Zara Larsson": "backdrop-zara-larsson", "backdrop|Nicki Minaj": "backdrop-nicki-minaj", "backdrop|Lady Gaga": "backdrop-lady-gaga", "backdrop|Sabrina Carpenter": "backdrop-sabrina-carpenter", "backdrop|Beyoncé": "backdrop-beyonce", "backdrop|Britney Spears": "backdrop-britney-spears", "backdrop|SZA": "backdrop-sza", "backdrop|Doja Cat": "backdrop-doja-cat", "made|feel-good": "made-feel-good", "made|late-night": "made-late-night", "made|rainy-day": "made-rainy-day", "made|road-trip": "made-road-trip", "made|heartbreak": "made-heartbreak", "made|workout": "made-workout", "made|focus": "made-focus", "made|relax": "made-relax", "made|wake-up": "made-wake-up", "made|sunny-afternoon": "made-sunny-afternoon", "made|dinner": "made-dinner", "made|energy": "made-energy"};
+const ART = {"Tame Impala|Currents": "album-tame-impala-currents", "Tame Impala|The Slow Rush": "album-tame-impala-the-slow-rush", "Daft Punk|Discovery": "album-daft-punk-discovery", "Kendrick Lamar|good kid, m.A.A.d city": "album-kendrick-lamar-good-kid-m-a-a-d-city", "Kendrick Lamar|DAMN.": "album-kendrick-lamar-damn", "Fleetwood Mac|Rumours": "album-fleetwood-mac-rumours", "Fleetwood Mac|Tango In the Night (Deluxe Edition)": "album-fleetwood-mac-tango-in-the-night-deluxe-edition", "Amy Winehouse|Back To Black (Deluxe Edition)": "album-amy-winehouse-back-to-black-deluxe-edition", "Khruangbin|Texas Moon": "album-khruangbin-texas-moon", "Khruangbin|A LA SALA": "album-khruangbin-a-la-sala", "Massive Attack|Mezzanine": "album-massive-attack-mezzanine", "Disclosure|Settle (Deluxe Version)": "album-disclosure-settle-deluxe-version", "Gorillaz|Demon Days": "album-gorillaz-demon-days", "Bon Iver|Bon Iver, Bon Iver": "album-bon-iver-bon-iver-bon-iver", "Phoebe Bridgers|Stranger in the Alps (Deluxe Edition)": "album-phoebe-bridgers-stranger-in-the-alps-deluxe-edit", "Radiohead|Karma Police": "album-radiohead-karma-police", "MGMT|Oracular Spectacular": "album-mgmt-oracular-spectacular", "KAYTRANADA|AIN'T NO DAMN WAY!": "album-kaytranada-aint-no-damn-way", "Outkast|Speakerboxxx/The Love Below": "album-outkast-speakerboxxx-the-love-below", "Kanye West|Late Registration": "album-kanye-west-late-registration", "Tyler, The Creator|Flower Boy": "album-tyler-the-creator-flower-boy", "photo|Tame Impala": "artist-tame-impala", "photo|Kendrick Lamar": "artist-kendrick-lamar", "photo|Fleetwood Mac": "artist-fleetwood-mac", "photo|Bad Bunny": "artist-bad-bunny", "photo|Amy Winehouse": "artist-amy-winehouse", "photo|Stevie Wonder": "artist-stevie-wonder", "photo|Nina Simone": "artist-nina-simone", "photo|Massive Attack": "artist-massive-attack", "backdrop|Tame Impala": "backdrop-tame-impala", "SZA|SOS": "album-sza-sos", "Frank Ocean|channel ORANGE": "album-frank-ocean-channel-orange", "The Weeknd|House Of Balloons (Original)": "album-the-weeknd-house-of-balloons-original", "Kali Uchis|Red Moon In Venus": "album-kali-uchis-red-moon-in-venus", "photo|Zara Larsson": "artist-zara-larsson", "photo|The Weeknd": "artist-the-weeknd", "photo|SZA": "artist-sza", "made|feel-good": "made-feel-good", "made|late-night": "made-late-night", "made|rainy-day": "made-rainy-day", "made|road-trip": "made-road-trip", "made|workout": "made-workout"};
 const art = (key) => `assets/art/${ART[key]}.jpg`;
 const WAVE = '<svg class="mwave" viewBox="0 0 512 226" aria-hidden="true"><use href="#wave"/></svg>';
 
@@ -186,14 +186,14 @@ function mixCover(el, mix, seed) {
 }
 
 const MIXES = [
-  { made: "late-night", name: "Late Night", sub: "Nicki Minaj, The Weeknd, Lauv and more" },
-  { made: "road-trip", name: "Road Trip", sub: "MARINA, Ciara, aespa and more" },
-  { made: "rainy-day", name: "Rainy Day", sub: "Laufey, Sam Smith, Haroula Rose and more" },
-  { made: "feel-good", name: "Feel Good", sub: "Lady Gaga, Ozuna, Davido and more" },
+  { made: "late-night", name: "Late Night", sub: "Nicki Minaj, Frank Ocean, Massive Attack and more" },
+  { made: "road-trip", name: "Road Trip", sub: "MARINA, Fleetwood Mac, Bad Bunny and more" },
+  { made: "rainy-day", name: "Rainy Day", sub: "Laufey, Bon Iver, Phoebe Bridgers and more" },
+  { made: "feel-good", name: "Feel Good", sub: "Davido, Ozuna, Stevie Wonder and more" },
   { name: "R&B Deep Cuts", sub: "Niche mix", family: 12, pictures: ["SZA|SOS", "Frank Ocean|channel ORANGE", "Kali Uchis|Red Moon In Venus", "The Weeknd|House Of Balloons (Original)"] },
-  { name: "Dreamy Synth-Pop", sub: "Your Sounds", family: 15, pictures: ["Lorde|Melodrama", "Carly Rae Jepsen|E•mo•tion (Deluxe Expanded Edition)", "Troye Sivan|Bloom", "Tove Lo|Dirt Femme"] },
-  { name: "2000s Pop", sub: "Niche mix", family: 10, pictures: ["Britney Spears|In The Zone", "Rihanna|Good Girl Gone Bad: Reloaded", "Lady Gaga|The Fame Monster (Deluxe Edition)", "Britney Spears|Circus (Deluxe Version)"] },
-  { name: "Dua Lipa Mix", sub: "Artist mix", family: 0, pictures: ["photo|Dua Lipa", "photo|Lady Gaga", "photo|Charli xcx", "photo|Sabrina Carpenter"] },
+  { name: "Hazy Psych", sub: "Your Sounds", family: 15, pictures: ["Tame Impala|Currents", "MGMT|Oracular Spectacular", "Khruangbin|Texas Moon", "Gorillaz|Demon Days"] },
+  { name: "Hip Hop Classics", sub: "Niche mix", family: 10, pictures: ["Outkast|Speakerboxxx/The Love Below", "Kendrick Lamar|good kid, m.A.A.d city", "Kanye West|Late Registration", "Tyler, The Creator|Flower Boy"] },
+  { name: "Amy Winehouse Mix", sub: "Artist mix", family: 0, pictures: ["photo|Amy Winehouse", "photo|Nina Simone", "photo|Stevie Wonder", "photo|Massive Attack"] },
 ];
 let mixSeed = 0;
 
@@ -206,17 +206,6 @@ function buildMixes() {
   }
   [...grid.children].forEach((li, i) => { if (!MIXES[i].made) mixCover($(".cover", li), MIXES[i], mixSeed); });
 }
-
-$("#reshuffle").addEventListener("click", () => {
-  mixSeed++;
-  const covers = document.querySelectorAll("#mix-grid .cover:not(.photo)");
-  if (reduceMotion.matches) { buildMixes(); return; }
-  covers.forEach((c, i) => c.animate([{ transform: "scale(1)" }, { transform: "scale(.92)", opacity: .4 }], { duration: 160, delay: i * 30, fill: "forwards", easing: "ease-in" }));
-  setTimeout(() => {
-    buildMixes();
-    covers.forEach((c, i) => c.animate([{ transform: "scale(.92)", opacity: .4 }, { transform: "scale(1)", opacity: 1 }], { duration: 380, delay: i * 30, fill: "forwards", easing: "cubic-bezier(.2,.8,.2,1)" }));
-  }, 180 + covers.length * 30);
-});
 
 /* ---------- Live station cover, from StationWave.cs ---------- */
 
@@ -359,12 +348,12 @@ function buildGuide() {
 const QUERIES = {
   "late night r&b": { groups: [["Moments", [["late night", .84], ["night drive", .52]]], ["Genre", [["r&b", .9], ["soul", .48]]], ["Mood", [["sensual", .71], ["chill", .62]]], ["Energy", [["calm", .64]]]],
     songs: [["Snooze", "SZA", "SZA|SOS"], ["Thinkin Bout You", "Frank Ocean", "Frank Ocean|channel ORANGE"], ["Wicked Games", "The Weeknd", "The Weeknd|House Of Balloons (Original)"]], next: ["Late Night Soul", "Smooth R&B"] },
-  "upbeat dance pop": { groups: [["Energy", [["upbeat", .88], ["danceable", .85]]], ["Genre", [["dance pop", .9], ["disco", .52]]], ["Mood", [["happy", .7]]], ["Moments", [["party", .66], ["workout", .45]]]],
-    songs: [["Don't Start Now", "Dua Lipa", "Dua Lipa|Future Nostalgia"], ["Padam Padam", "Kylie Minogue", "Kylie Minogue|Tension (Deluxe)"], ["Run Away With Me", "Carly Rae Jepsen", "Carly Rae Jepsen|E•mo•tion (Deluxe Expanded Edition)"]], next: ["Happy Disco", "Party Pop"] },
-  "sad piano": { groups: [["Mood", [["sad", .82], ["melancholy", .74]]], ["Instruments", [["piano", .9], ["strings", .44]]], ["Energy", [["calm", .77]]], ["Vocals", [["female vocals", .69]]]],
-    songs: [["when the party's over", "Billie Eilish", "Billie Eilish|WHEN WE ALL FALL ASLEEP, WHERE DO WE GO?"], ["drivers license", "Olivia Rodrigo", "Olivia Rodrigo|SOUR"], ["Liability", "Lorde", "Lorde|Melodrama"]], next: ["Heartbreak Ballads", "Quiet Piano"] },
-  "dreamy synth pop": { groups: [["Mood", [["dreamy", .78]]], ["Genre", [["synth-pop", .87], ["electronic", .6]]], ["Instruments", [["synthesizer", .91]]], ["Moments", [["night drive", .63]]]],
-    songs: [["Blinding Lights", "The Weeknd", "The Weeknd|After Hours (Deluxe)"], ["Supercut", "Lorde", "Lorde|Melodrama"], ["Bloom", "Troye Sivan", "Troye Sivan|Bloom"]], next: ["Night Drive", "Retro Synth"] },
+  "upbeat house": { groups: [["Energy", [["upbeat", .86], ["danceable", .9]]], ["Genre", [["house", .88], ["french house", .61]]], ["Mood", [["happy", .66]]], ["Moments", [["party", .72], ["workout", .41]]]],
+    songs: [["One More Time", "Daft Punk", "Daft Punk|Discovery"], ["Latch", "Disclosure", "Disclosure|Settle (Deluxe Version)"], ["SPACE INVADER", "KAYTRANADA", "KAYTRANADA|AIN'T NO DAMN WAY!"]], next: ["Disco House", "Party House"] },
+  "sad indie": { groups: [["Mood", [["sad", .8], ["melancholy", .77]]], ["Genre", [["indie folk", .74], ["alternative", .62]]], ["Instruments", [["acoustic guitar", .7], ["piano", .38]]], ["Energy", [["calm", .75]]]],
+    songs: [["Holocene", "Bon Iver", "Bon Iver|Bon Iver, Bon Iver"], ["Funeral", "Phoebe Bridgers", "Phoebe Bridgers|Stranger in the Alps (Deluxe Edition)"], ["Karma Police", "Radiohead", "Radiohead|Karma Police"]], next: ["Indie Folk", "Quiet Songs"] },
+  "hazy psych grooves": { groups: [["Mood", [["dreamy", .76], ["groovy", .7]]], ["Genre", [["psychedelic", .86], ["indie rock", .58]]], ["Instruments", [["bass guitar", .73], ["synthesizer", .6]]], ["Moments", [["night drive", .55]]]],
+    songs: [["Let It Happen", "Tame Impala", "Tame Impala|Currents"], ["Electric Feel", "MGMT", "MGMT|Oracular Spectacular"], ["Mariella", "Khruangbin", "Khruangbin|Texas Moon"]], next: ["Psych Rock", "Late Night Grooves"] },
 };
 const titleCase = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\bR&b\b/, "R&B");
 let typing = 0;
@@ -497,7 +486,7 @@ function buildMixer() {
 }
 
 /* ---------- Visualizers ---------- */
-// Ports of the app's painters (src/MelodayMusic.App/Controls), fed by a made-up song so the page stays silent.
+// Ports of the app's painters (src/MelodayMusic.App/Controls), fed by a smoothly drifting spectrum so the page stays silent.
 
 const vHash = (a, b) => {
   let h = (Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263)) | 0;
@@ -557,58 +546,36 @@ function vividColour(img) {
   return best.w > 0 ? [best.r / best.w, best.g / best.w, best.b / best.w] : [244, 242, 238];
 }
 
-/** A 32-band spectrum for a four-bar loop at 118 BPM: kick, bass line, snare on two and four, hats, chords and a lead. */
-function makeSong() {
-  const bpm = 118, N = 32, bands = new Float32Array(N);
-  const bassNotes = [0, 0, 3, 0, 5, 5, 3, 7], lead = [14, 16, 18, 16, 20, 18, 16, 14, 12, 14, 16, 18, 22, 20, 18, 16];
-  let lastBeat = -1;
+/** A 32-band spectrum that drifts smoothly, with no beat, so the visualizers glide rather than twitch. */
+function makeFlow() {
+  const N = 32, bands = new Float32Array(N);
   return {
-    bpm, bands,
+    bpm: 90, bands, bass: 0, level: 0,
     update(t) {
-      const beat = (t * bpm) / 60, phase = beat % 1, bar = Math.floor(beat / 4) % 4, inBar = beat % 4;
-      const kick = Math.exp(-phase * 7);
-      const snare = (Math.floor(inBar) % 2 === 1) ? Math.exp(-phase * 9) : 0;
-      const eighth = (beat * 2) % 1, sixteenth = (beat * 4) % 1;
-      const hat = Math.exp(-sixteenth * 16) * ((Math.floor(beat * 4) % 2) ? 0.55 : 1);
-      const bassEnv = Math.exp(-eighth * 3.5), bassBand = 1 + (bassNotes[Math.floor(beat * 2) % 8] % 4);
-      const chord = 0.45 + 0.25 * Math.sin((beat / 16) * Math.PI * 2 + bar);
-      const leadBand = lead[Math.floor(beat * 2) % 16], leadEnv = 0.5 + 0.5 * Math.exp(-eighth * 2.5);
-      const drop = bar === 3 && inBar > 3 ? 0.35 : 1;
       for (let b = 0; b < N; b++) {
-        let v = 0.03 + 0.06 * vNoise(t * 6, b, 3);
-        if (b < 5) v += kick * (1 - b * 0.15) * drop;
-        v += bassEnv * 0.7 * Math.exp(-((b - bassBand) ** 2) / 2.5);
-        if (b >= 7 && b <= 22) v += snare * (0.55 - Math.abs(b - 13) * 0.03);
-        if (b >= 6 && b <= 17) v += chord * 0.35 * (0.6 + 0.4 * Math.sin(b * 1.3 + bar));
-        v += leadEnv * 0.45 * Math.exp(-((b - leadBand) ** 2) / 1.6);
-        if (b >= 20) v += hat * (0.55 + (b - 20) * 0.015);
-        bands[b] = Math.min(1, v * 1.35 * (1 - b * 0.006));
+        const along = b / (N - 1), slow = vNoise(t * 0.32, b * 0.2, 7);
+        const wave = 0.5 + 0.5 * Math.sin(t * 0.8 - along * 5);
+        bands[b] = (0.12 + 0.62 * slow * slow + 0.26 * wave) * (1 - along * 0.3);
       }
-      const beatIndex = Math.floor(beat);
-      if (beatIndex !== lastBeat) { lastBeat = beatIndex; this.beatAt = (beatIndex * 60) / bpm; }
       this.bass = vAverage(bands, 0, 4);
       this.level = vAverage(bands, 0, N) * 0.4;
     },
-    pulse(t) { return Math.exp(-Math.max(0, t - (this.beatAt ?? 0)) / 0.16); },
+    pulse() { return 0; },
   };
 }
 
-/** BandFollower: each band against its own recent peak and average, so visuals follow hits rather than loudness. */
+/** Each band eased towards the spectrum, so shapes change gently. */
 function bandFollower(count) {
-  const peak = new Float32Array(count), mean = new Float32Array(count), levels = new Float32Array(count);
+  const levels = new Float32Array(count);
   return {
     levels,
     update(bands, slices, dt) {
       slices = Math.min(slices, count);
-      const fall = Math.exp(-dt / 2.5), settle = 1 - Math.exp(-dt / 0.8);
+      const ease = 1 - Math.exp(-dt / 0.35);
       for (let i = 0; i < slices; i++) {
         const from = Math.floor((i * bands.length) / slices);
         const raw = vAverage(bands, from, Math.max(from + 1, Math.floor(((i + 1) * bands.length) / slices)));
-        peak[i] = Math.max(raw, Math.max(peak[i] * fall, 0.04));
-        mean[i] += (raw - mean[i]) * settle;
-        const steady = raw / peak[i], hit = Math.min(1, Math.max(0, (raw - mean[i]) / (0.5 * peak[i])));
-        const target = Math.min(1, Math.max(0, 0.3 * steady * steady + 0.9 * hit));
-        levels[i] += (target - levels[i]) * (1 - Math.exp(-dt / (target > levels[i] ? 0.025 : 0.22)));
+        levels[i] += (raw - levels[i]) * ease;
       }
     },
   };
@@ -847,7 +814,7 @@ function retrowavePainter() {
 }
 
 function buildVisualizer() {
-  const stage = $(".stage"), song = makeSong(), art = $(".stage-art.real-art");
+  const stage = $(".stage"), song = makeFlow(), art = $(".stage-art.real-art");
   const theatre = $(".theatre");
   let mode = "bars";
   let palette = paletteFrom([30, 180, 255]);
@@ -936,15 +903,15 @@ function buildVisualizer() {
 const SOUND_RAMP = [0xFF6E4B, 0xE11487, 0x8732FF, 0x1E5ADC, 0x0F3796];
 const soundColour = (s) => { const p = s * (SOUND_RAMP.length - 1), i = Math.min(SOUND_RAMP.length - 2, Math.floor(p)); return mixRgb(SOUND_RAMP[i], SOUND_RAMP[i + 1], p - i); };
 // Cosine similarity of the Meloday Engine's fingerprints for these songs, in SONGS order.
-const SIM = [[1.0, 0.735, 0.686, 0.764, 0.642, 0.825, 0.695, 0.381, 0.751, 0.827, 0.92, 0.844, 0.857, 0.74], [0.735, 1.0, 0.672, 0.642, 0.642, 0.761, 0.628, 0.461, 0.716, 0.769, 0.761, 0.725, 0.707, 0.727], [0.686, 0.672, 1.0, 0.817, 0.835, 0.835, 0.692, 0.405, 0.637, 0.788, 0.623, 0.759, 0.837, 0.761], [0.764, 0.642, 0.817, 1.0, 0.826, 0.811, 0.726, 0.425, 0.813, 0.857, 0.73, 0.791, 0.829, 0.789], [0.642, 0.642, 0.835, 0.826, 1.0, 0.746, 0.728, 0.319, 0.687, 0.768, 0.586, 0.761, 0.786, 0.726], [0.825, 0.761, 0.835, 0.811, 0.746, 1.0, 0.806, 0.434, 0.696, 0.901, 0.762, 0.842, 0.829, 0.73], [0.695, 0.628, 0.692, 0.726, 0.728, 0.806, 1.0, 0.467, 0.61, 0.8, 0.639, 0.723, 0.697, 0.556], [0.381, 0.461, 0.405, 0.425, 0.319, 0.434, 0.467, 1.0, 0.337, 0.446, 0.376, 0.345, 0.359, 0.235], [0.751, 0.716, 0.637, 0.813, 0.687, 0.696, 0.61, 0.337, 1.0, 0.855, 0.786, 0.801, 0.82, 0.833], [0.827, 0.769, 0.788, 0.857, 0.768, 0.901, 0.8, 0.446, 0.855, 1.0, 0.8, 0.893, 0.884, 0.802], [0.92, 0.761, 0.623, 0.73, 0.586, 0.762, 0.639, 0.376, 0.786, 0.8, 1.0, 0.807, 0.784, 0.778], [0.844, 0.725, 0.759, 0.791, 0.761, 0.842, 0.723, 0.345, 0.801, 0.893, 0.807, 1.0, 0.896, 0.858], [0.857, 0.707, 0.837, 0.829, 0.786, 0.829, 0.697, 0.359, 0.82, 0.884, 0.784, 0.896, 1.0, 0.842], [0.74, 0.727, 0.761, 0.789, 0.726, 0.73, 0.556, 0.235, 0.833, 0.802, 0.778, 0.858, 0.842, 1.0]];
+const SIM = [[1.0, 0.828, 0.524, 0.69, 0.512, 0.296, 0.449, 0.364, 0.551, 0.737, 0.752, 0.659, 0.427, 0.49], [0.828, 1.0, 0.69, 0.69, 0.548, 0.357, 0.525, 0.445, 0.608, 0.804, 0.631, 0.624, 0.534, 0.546], [0.524, 0.69, 1.0, 0.682, 0.472, 0.347, 0.422, 0.543, 0.52, 0.588, 0.459, 0.448, 0.467, 0.518], [0.69, 0.69, 0.682, 1.0, 0.503, 0.356, 0.452, 0.5, 0.441, 0.655, 0.579, 0.604, 0.419, 0.506], [0.512, 0.548, 0.472, 0.503, 1.0, 0.805, 0.392, 0.295, 0.554, 0.604, 0.445, 0.489, 0.453, 0.56], [0.296, 0.357, 0.347, 0.356, 0.805, 1.0, 0.254, 0.212, 0.412, 0.444, 0.235, 0.25, 0.307, 0.478], [0.449, 0.525, 0.422, 0.452, 0.392, 0.254, 1.0, 0.758, 0.651, 0.609, 0.586, 0.596, 0.257, 0.378], [0.364, 0.445, 0.543, 0.5, 0.295, 0.212, 0.758, 1.0, 0.547, 0.538, 0.476, 0.464, 0.224, 0.317], [0.551, 0.608, 0.52, 0.441, 0.554, 0.412, 0.651, 0.547, 1.0, 0.739, 0.616, 0.637, 0.467, 0.537], [0.737, 0.804, 0.588, 0.655, 0.604, 0.444, 0.609, 0.538, 0.739, 1.0, 0.646, 0.67, 0.544, 0.601], [0.752, 0.631, 0.459, 0.579, 0.445, 0.235, 0.586, 0.476, 0.616, 0.646, 1.0, 0.879, 0.527, 0.647], [0.659, 0.624, 0.448, 0.604, 0.489, 0.25, 0.596, 0.464, 0.637, 0.67, 0.879, 1.0, 0.607, 0.685], [0.427, 0.534, 0.467, 0.419, 0.453, 0.307, 0.257, 0.224, 0.467, 0.544, 0.527, 0.607, 1.0, 0.839], [0.49, 0.546, 0.518, 0.506, 0.56, 0.478, 0.378, 0.317, 0.537, 0.601, 0.647, 0.685, 0.839, 1.0]];
 const SONGS = [
-  ["Lush Life", "Zara Larsson", "So Good", 2017, 98], ["Midnight Sun", "Zara Larsson", "Midnight Sun", 2025, 101],
-  ["Toxic", "Britney Spears", "In The Zone", 2003, 143], ["Womanizer", "Britney Spears", "Circus (Deluxe Version)", 2008, 139],
-  ["Umbrella", "Rihanna", "Good Girl Gone Bad: Reloaded", 2008, 87], ["Only Girl (In The World)", "Rihanna", "Loud", 2010, 126],
-  ["Bad Romance", "Lady Gaga", "The Fame Monster (Deluxe Edition)", 2009, 119], ["Abracadabra", "Lady Gaga", "MAYHEM", 2025, 126],
-  ["7 rings", "Ariana Grande", "thank u, next", 2019, 140], ["Into You", "Ariana Grande", "Dangerous Woman", 2016, 108],
-  ["New Rules", "Dua Lipa", "Dua Lipa (Deluxe)", 2017, 116], ["Don't Start Now", "Dua Lipa", "Future Nostalgia", 2020, 124],
-  ["Espresso", "Sabrina Carpenter", "Short n' Sweet", 2024, 104], ["Nonsense", "Sabrina Carpenter", "emails i can't send", 2022, 139],
+  ["The Less I Know The Better", "Tame Impala", "Currents", 2015, 117], ["Borderline", "Tame Impala", "The Slow Rush", 2020, 98],
+  ["One More Time", "Daft Punk", "Discovery", 2001, 123], ["Digital Love", "Daft Punk", "Discovery", 2001, 125],
+  ["Money Trees", "Kendrick Lamar", "good kid, m.A.A.d city", 2012, 97], ["HUMBLE.", "Kendrick Lamar", "DAMN.", 2017, 150],
+  ["Dreams", "Fleetwood Mac", "Rumours", 1977, 120], ["Everywhere", "Fleetwood Mac", "Tango In the Night (Deluxe Edition)", 1987, 115],
+  ["Back To Black", "Amy Winehouse", "Back To Black (Deluxe Edition)", 2006, 124], ["Rehab", "Amy Winehouse", "Back To Black (Deluxe Edition)", 2006, 97],
+  ["Mariella", "Khruangbin", "Texas Moon", 2022, 110], ["May Ninth", "Khruangbin", "A LA SALA", 2024, 80],
+  ["Teardrop", "Massive Attack", "Mezzanine", 1998, 77], ["Angel", "Massive Attack", "Mezzanine", 1998, 107],
 ].map(([title, a, album, y, bpm], id) => ({ id, title, a, y, bpm, art: art(`${a}|${album}`), s: (1 - SIM[0][id]) / (1 - Math.min(...SIM[0])) }));
 const QUEUED = [1, 6, 7, 2, 12, 3, 9, 8, 4, 10, 11, 5, 13];
 const byId = (id) => SONGS[id];
@@ -963,7 +930,7 @@ const CURATORS = [
     seen.forEach((a) => QUEUED.filter((id) => byId(id).a === a).forEach((id) => order.push(id)));
     return order;
   }],
-  ["twin", "Twin", "Stays close to what's playing. This order comes from the Meloday Engine's fingerprints of these songs, and the bar under each cover shows how close it sounds to Lush Life.", () =>
+  ["twin", "Twin", "Stays close to what's playing. This order comes from the Meloday Engine's fingerprints of these songs, and the bar under each cover shows how close it sounds to The Less I Know The Better.", () =>
     [...QUEUED].sort((x, y) => SIM[0][y] - SIM[0][x])],
   ["drift", "Drift", "Starts close to what's playing, then wanders a little further with each song.", () =>
     chain(SONGS[0], QUEUED, (a, b) => 1 - SIM[a.id][b.id])],
@@ -1040,7 +1007,7 @@ function buildCurators() {
 /* ---------- Trends ---------- */
 
 function buildTrends() {
-  $("#top-artists").innerHTML = ["Nicki Minaj", "Zara Larsson", "Ariana Grande", "Tove Lo", "Lana Del Rey"].map((a, i) =>
+  $("#top-artists").innerHTML = ["Tame Impala", "Kendrick Lamar", "Zara Larsson", "Fleetwood Mac", "Bad Bunny"].map((a, i) =>
     `<li><img src="${art("photo|" + a)}" alt="" loading="lazy"><span><b>${i + 1}</b>${a}</span></li>`).join("");
   const r = rng("trends");
   const cal = $("#calendar");
@@ -1170,31 +1137,10 @@ const FEATURES = [
 ];
 
 function buildFeatures() {
-  const list = $("#feature-list"), input = $("#feature-filter"), empty = $("#feature-empty"), count = $("#feature-count");
   const total = FEATURES.reduce((n, [, items]) => n + items.length, 0);
-  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-  const mark = (text, q) => {
-    if (!q) return esc(text);
-    const i = text.toLowerCase().indexOf(q);
-    return i < 0 ? esc(text) : esc(text.slice(0, i)) + "<mark>" + esc(text.slice(i, i + q.length)) + "</mark>" + esc(text.slice(i + q.length));
-  };
-  function render() {
-    const q = input.value.trim().toLowerCase();
-    let shown = 0;
-    list.innerHTML = FEATURES.map(([group, items]) => {
-      const groupHit = q && group.toLowerCase().includes(q);
-      const hits = items.filter((t) => !q || groupHit || t.toLowerCase().includes(q));
-      if (!hits.length) return "";
-      shown += hits.length;
-      return `<div class="group"><h3>${mark(group, q)}</h3><ul>${hits.map((t) => `<li>${mark(t, q)}</li>`).join("")}</ul></div>`;
-    }).join("");
-    count.textContent = q ? `Showing ${shown} of ${total} features.` : `${total} features, grouped by what they're for.`;
-    empty.hidden = shown > 0;
-    $("span", empty).textContent = input.value.trim();
-  }
-  input.addEventListener("input", render);
-  $("#feature-clear").addEventListener("click", () => { input.value = ""; render(); input.focus(); });
-  render();
+  $("#feature-count").textContent = `${total} features, grouped by what they're for.`;
+  $("#feature-list").innerHTML = FEATURES.map(([group, items]) =>
+    `<div class="group"><h3>${group}</h3><ul>${items.map((t) => `<li>${t}</li>`).join("")}</ul></div>`).join("");
 }
 
 /* ---------- Page ---------- */

@@ -11,7 +11,7 @@
   <link rel="icon" href="assets/symbol.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icon.png">
   <link rel="preload" href="assets/DMSans.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -88,16 +88,12 @@
     <!-- Made for You -->
     <section class="section" id="mixes" aria-labelledby="mixes-title">
       <div class="wrap">
-        <div class="section-head split">
+        <div class="section-head">
           <div>
             <p class="eyebrow">Made for You</p>
             <h2 id="mixes-title">Mixes made from what you actually play</h2>
             <p class="lede">Daily mixes of about 30 songs follow your listening. Every Monday brings mood, energy and moment playlists, Genre Essentials for the genres you play most, and niche mixes named in two words about the music.</p>
           </div>
-          <button class="button button-quiet" type="button" id="reshuffle">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.97a4 4 0 0 0 3.3-1.7l5.45-8.6a4 4 0 0 1 3.3-1.7H22"/><path d="M2 6h1.97a4 4 0 0 1 3.3 1.7l.52.83"/><path d="M22 18h-6.04a4 4 0 0 1-3.3-1.8l-.52-.82"/></svg>
-            Redraw the covers
-          </button>
         </div>
         <ul class="cover-grid" id="mix-grid" aria-label="Example Made for You playlists"></ul>
         <ul class="facts">
@@ -125,8 +121,8 @@
               <h3 id="guide-title">Meloday Pulse</h3>
               <p class="muted" id="guide-now"></p>
               <div class="on-air-song">
-                <img src="assets/art/album-rihanna-loud.jpg" alt="">
-                <span><b>Only Girl (In The World)</b> Rihanna</span>
+                <img src="assets/art/album-gorillaz-demon-days.jpg" alt="">
+                <span><b>Feel Good Inc.</b> Gorillaz</span>
               </div>
             </div>
           </div>
@@ -180,8 +176,8 @@
         <figure class="mixer">
           <canvas id="mix-canvas" role="img" aria-label="Diagram of an AutoMix transition over eight bars. The incoming song's highs arrive first, then its mids, then the bass swaps on the downbeat halfway through, and the outgoing song's mids and highs fade last."></canvas>
           <figcaption>
-            <span class="key key-a"><img src="assets/art/album-lady-gaga-the-fame-monster-deluxe-edition.jpg" alt=""><span><b>Bad Romance</b> Lady Gaga. Eases from 119 to 121.5 BPM</span></span>
-            <span class="key key-b"><img src="assets/art/album-dua-lipa-future-nostalgia.jpg" alt=""><span><b>Don't Start Now</b> Dua Lipa. Starts at 121.5, eases back to 124</span></span>
+            <span class="key key-a"><img src="assets/art/album-daft-punk-discovery.jpg" alt=""><span><b>One More Time</b> Daft Punk. Eases from 123 to 122.5 BPM</span></span>
+            <span class="key key-b"><img src="assets/art/album-disclosure-settle-deluxe-version.jpg" alt=""><span><b>Latch</b> Disclosure. Starts at 122.5, eases back to 122</span></span>
           </figcaption>
         </figure>
         <div class="three">
@@ -211,14 +207,14 @@
         </div>
         <div class="theatre">
           <div class="stage" data-mode="bars">
-            <img class="stage-backdrop" src="assets/art/backdrop-zara-larsson.jpg" alt="">
+            <img class="stage-backdrop" src="assets/art/backdrop-tame-impala.jpg" alt="">
             <canvas id="vis-canvas" role="img" aria-label="A visualizer moving to the music over the artist's photo."></canvas>
             <div class="stage-scrim" aria-hidden="true"></div>
             <div class="stage-meta real">
-              <img class="stage-art real-art" src="assets/art/album-zara-larsson-so-good.jpg" alt="">
+              <img class="stage-art real-art" src="assets/art/album-tame-impala-currents.jpg" alt="">
               <div>
-                <p class="stage-title">Lush Life</p>
-                <p class="stage-artist">Zara Larsson</p>
+                <p class="stage-title">The Less I Know The Better</p>
+                <p class="stage-artist">Tame Impala</p>
               </div>
             </div>
             <div class="stage-meta demo">
@@ -318,23 +314,14 @@
     <!-- All features -->
     <section class="section" id="features" aria-labelledby="features-title">
       <div class="wrap">
-        <div class="section-head split">
+        <div class="section-head">
           <div>
             <p class="eyebrow">Everything in the app</p>
             <h2 id="features-title">All features</h2>
             <p class="lede" id="feature-count"></p>
           </div>
-          <div class="filter">
-            <label for="feature-filter" class="visually-hidden">Filter features</label>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-            <input id="feature-filter" type="search" placeholder="Filter features" autocomplete="off" spellcheck="false">
-          </div>
         </div>
         <div class="feature-list" id="feature-list"></div>
-        <div class="empty" id="feature-empty" hidden>
-          <p>No features match "<span></span>".</p>
-          <button class="button button-quiet button-small" type="button" id="feature-clear">Clear filter</button>
-        </div>
       </div>
     </section>
 
@@ -435,6 +422,6 @@
     </symbol>
   </svg>
 
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>
