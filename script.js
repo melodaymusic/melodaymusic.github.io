@@ -497,113 +497,436 @@ function buildMixer() {
 }
 
 /* ---------- Visualizers ---------- */
+// Ports of the app's painters (src/MelodayMusic.App/Controls), fed by a made-up song so the page stays silent.
+
+const vHash = (a, b) => {
+  let h = (Math.imul(a | 0, 374761393) + Math.imul(b | 0, 668265263)) | 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177);
+  h ^= h >>> 16;
+  return (h & 0xFFFFFF) / 0x1000000;
+};
+const vNoise = (x, y, seed = 0) => {
+  const ix = Math.floor(x), iy = Math.floor(y), fx = x - ix, fy = y - iy;
+  const u = fx * fx * (3 - 2 * fx), v = fy * fy * (3 - 2 * fy);
+  const c = (cx, cy) => vHash(cx + seed * 7919, cy * 31 + seed);
+  const top = c(ix, iy) + (c(ix + 1, iy) - c(ix, iy)) * u;
+  const bottom = c(ix, iy + 1) + (c(ix + 1, iy + 1) - c(ix, iy + 1)) * u;
+  return top + (bottom - top) * v;
+};
+const vLayered = (x, y, seed = 0) => (vNoise(x, y, seed) * 2 + vNoise(x * 2.3 + 17, y * 2.3 + 5, seed + 1)) / 3;
+const vSmooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const vAverage = (values, from, to) => { let s = 0; for (let i = from; i < to; i++) s += values[i]; return s / Math.max(1, to - from); };
+const vMix = (a, b, t) => { t = Math.min(1, Math.max(0, t)); return a.map((x, i) => x + (b[i] - x) * t); };
+const vCss = (c, a = 1) => `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${a})`;
+
+function hsv(h, s, v) {
+  const c = v * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = v - c;
+  const [r, g, b] = [[c, x, 0], [x, c, 0], [0, c, x], [0, x, c], [x, 0, c], [c, 0, x]][Math.floor(h / 60) % 6];
+  return [(r + m) * 255, (g + m) * 255, (b + m) * 255];
+}
+function toHsv([r, g, b]) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), d = max - min;
+  const h = d < 1e-6 ? 0 : (max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4) * 60;
+  return [(h + 360) % 360, max <= 0 ? 0 : d / max, max];
+}
+
+/** VisualPalette.From: the artwork's strongest hue, brightened, with two neighbours and a light tone. */
+function paletteFrom(colour) {
+  const [h, s, v] = toHsv(colour);
+  const main = hsv(h, Math.min(1, s * 1.2), Math.max(v, 0.82));
+  const [mh, ms, mv] = toHsv(main);
+  const near = (deg) => hsv((((mh + deg) % 360) + 360) % 360, ms, mv);
+  return [near(-46), near(-20), main, vMix(main, [255, 255, 255], 0.5)];
+}
+
+/** The most vivid colour in an image, weighted by how much of the image it covers. */
+function vividColour(img) {
+  const c = document.createElement("canvas"), n = 48;
+  c.width = c.height = n;
+  const x = c.getContext("2d", { willReadFrequently: true });
+  x.drawImage(img, 0, 0, n, n);
+  const data = x.getImageData(0, 0, n, n).data, bins = Array.from({ length: 24 }, () => ({ w: 0, r: 0, g: 0, b: 0 }));
+  for (let i = 0; i < data.length; i += 4) {
+    const rgb = [data[i], data[i + 1], data[i + 2]], [h, s, v] = toHsv(rgb);
+    if (s < 0.25 || v < 0.25) continue;
+    const bin = bins[Math.floor(h / 15) % 24], w = s * s * v;
+    bin.w += w; bin.r += rgb[0] * w; bin.g += rgb[1] * w; bin.b += rgb[2] * w;
+  }
+  const best = bins.reduce((a, b) => (b.w > a.w ? b : a));
+  return best.w > 0 ? [best.r / best.w, best.g / best.w, best.b / best.w] : [244, 242, 238];
+}
+
+/** A 32-band spectrum for a four-bar loop at 118 BPM: kick, bass line, snare on two and four, hats, chords and a lead. */
+function makeSong() {
+  const bpm = 118, N = 32, bands = new Float32Array(N);
+  const bassNotes = [0, 0, 3, 0, 5, 5, 3, 7], lead = [14, 16, 18, 16, 20, 18, 16, 14, 12, 14, 16, 18, 22, 20, 18, 16];
+  let lastBeat = -1;
+  return {
+    bpm, bands,
+    update(t) {
+      const beat = (t * bpm) / 60, phase = beat % 1, bar = Math.floor(beat / 4) % 4, inBar = beat % 4;
+      const kick = Math.exp(-phase * 7);
+      const snare = (Math.floor(inBar) % 2 === 1) ? Math.exp(-phase * 9) : 0;
+      const eighth = (beat * 2) % 1, sixteenth = (beat * 4) % 1;
+      const hat = Math.exp(-sixteenth * 16) * ((Math.floor(beat * 4) % 2) ? 0.55 : 1);
+      const bassEnv = Math.exp(-eighth * 3.5), bassBand = 1 + (bassNotes[Math.floor(beat * 2) % 8] % 4);
+      const chord = 0.45 + 0.25 * Math.sin((beat / 16) * Math.PI * 2 + bar);
+      const leadBand = lead[Math.floor(beat * 2) % 16], leadEnv = 0.5 + 0.5 * Math.exp(-eighth * 2.5);
+      const drop = bar === 3 && inBar > 3 ? 0.35 : 1;
+      for (let b = 0; b < N; b++) {
+        let v = 0.03 + 0.06 * vNoise(t * 6, b, 3);
+        if (b < 5) v += kick * (1 - b * 0.15) * drop;
+        v += bassEnv * 0.7 * Math.exp(-((b - bassBand) ** 2) / 2.5);
+        if (b >= 7 && b <= 22) v += snare * (0.55 - Math.abs(b - 13) * 0.03);
+        if (b >= 6 && b <= 17) v += chord * 0.35 * (0.6 + 0.4 * Math.sin(b * 1.3 + bar));
+        v += leadEnv * 0.45 * Math.exp(-((b - leadBand) ** 2) / 1.6);
+        if (b >= 20) v += hat * (0.55 + (b - 20) * 0.015);
+        bands[b] = Math.min(1, v * 1.35 * (1 - b * 0.006));
+      }
+      const beatIndex = Math.floor(beat);
+      if (beatIndex !== lastBeat) { lastBeat = beatIndex; this.beatAt = (beatIndex * 60) / bpm; }
+      this.bass = vAverage(bands, 0, 4);
+      this.level = vAverage(bands, 0, N) * 0.4;
+    },
+    pulse(t) { return Math.exp(-Math.max(0, t - (this.beatAt ?? 0)) / 0.16); },
+  };
+}
+
+/** BandFollower: each band against its own recent peak and average, so visuals follow hits rather than loudness. */
+function bandFollower(count) {
+  const peak = new Float32Array(count), mean = new Float32Array(count), levels = new Float32Array(count);
+  return {
+    levels,
+    update(bands, slices, dt) {
+      slices = Math.min(slices, count);
+      const fall = Math.exp(-dt / 2.5), settle = 1 - Math.exp(-dt / 0.8);
+      for (let i = 0; i < slices; i++) {
+        const from = Math.floor((i * bands.length) / slices);
+        const raw = vAverage(bands, from, Math.max(from + 1, Math.floor(((i + 1) * bands.length) / slices)));
+        peak[i] = Math.max(raw, Math.max(peak[i] * fall, 0.04));
+        mean[i] += (raw - mean[i]) * settle;
+        const steady = raw / peak[i], hit = Math.min(1, Math.max(0, (raw - mean[i]) / (0.5 * peak[i])));
+        const target = Math.min(1, Math.max(0, 0.3 * steady * steady + 0.9 * hit));
+        levels[i] += (target - levels[i]) * (1 - Math.exp(-dt / (target > levels[i] ? 0.025 : 0.22)));
+      }
+    },
+  };
+}
+
+function barsPainter() {
+  const COUNT = 12;
+  return (ctx, s, p, t, w, h) => {
+    const bands = s.bands, span = Math.min(w * 0.84, h * 1.6), slot = span / COUNT, bw = slot * 0.88;
+    const left = (w - span) / 2 + (slot - bw) / 2, mid = h * 0.5, tallest = Math.min(h * 0.64, span * 0.62);
+    const swell = 1 + 0.06 * s.pulse(t);
+    for (let i = 0; i < COUNT; i++) {
+      const level = Math.min(1, vAverage(bands, Math.floor((i * bands.length) / COUNT), Math.floor(((i + 1) * bands.length) / COUNT)) * 1.15);
+      const bh = Math.min(h * 0.9, bw + level * (tallest - bw) * swell);
+      const drift = Math.sin(i * 1.9 + t * 0.7) * h * 0.035 * (0.4 + level);
+      const top = Math.min(Math.max(mid - bh / 2 + drift, h * 0.04), h * 0.96 - bh);
+      const x = left + i * slot, g = ctx.createLinearGradient(0, top, 0, top + bh);
+      g.addColorStop(0, vCss(p[3])); g.addColorStop(1, vCss(p[1]));
+      ctx.fillStyle = g; roundRect(ctx, x, top, bw, bh, bw / 2); ctx.fill();
+    }
+  };
+}
+
+function haloPainter() {
+  const SPOKES = 96;
+  return (ctx, s, p, t, w, h) => {
+    const cx = w / 2, cy = h / 2, m = Math.min(w, h), r0 = m * 0.22 * (1 + 0.07 * s.bass), reach = m * 0.26;
+    ctx.fillStyle = vCss(p[2], 0.1 + 0.22 * s.bass);
+    ctx.beginPath(); ctx.arc(cx, cy, r0 * 0.97, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = vCss(p[3], 0.55); ctx.lineWidth = Math.max(1.5, m * 0.004); ctx.stroke();
+    ctx.lineCap = "round"; ctx.lineWidth = Math.max(2, m * 0.0085);
+    for (let k = 0; k < SPOKES; k++) {
+      const fold = k <= SPOKES / 2 ? k : SPOKES - k, along = (fold * (s.bands.length - 1)) / (SPOKES / 2);
+      const lo = Math.floor(along), hi = Math.min(s.bands.length - 1, lo + 1);
+      const level = s.bands[lo] * (1 - (along - lo)) + s.bands[hi] * (along - lo);
+      const a = (k / SPOKES) * Math.PI * 2 - Math.PI / 2, dx = Math.cos(a), dy = Math.sin(a), len = m * 0.012 + level * reach;
+      ctx.strokeStyle = vCss(vMix(p[1], p[3], level));
+      ctx.beginPath(); ctx.moveTo(cx + dx * r0 * 1.04, cy + dy * r0 * 1.04); ctx.lineTo(cx + dx * (r0 * 1.04 + len), cy + dy * (r0 * 1.04 + len)); ctx.stroke();
+    }
+    ctx.lineCap = "butt";
+  };
+}
+
+function pillarsPainter() {
+  const MOST = 32, PILLS = 7, unit = (seed) => { const v = Math.sin(seed) * 43758.5453; return v - Math.floor(v); };
+  const lengths = Array.from({ length: MOST }, (_, i) => Array.from({ length: PILLS }, (_, k) => 0.18 + 0.45 * unit(i * 12.9898 + k * 78.233)));
+  const weights = Array.from({ length: MOST }, (_, i) => 0.65 + 0.7 * unit(i * 4.1414 + 1.7));
+  const slide = new Float32Array(MOST), follow = bandFollower(MOST);
+  let last = -1;
+  return (ctx, s, p, t, w, h) => {
+    const dt = last < 0 ? 1 / 60 : Math.min(0.1, Math.max(0.001, t - last)); last = t;
+    const span = w * 0.94, height = h * 0.92, count = Math.min(MOST, Math.max(8, Math.round(span / (height * 0.1))));
+    const left = (w - span) / 2, top = (h - height) / 2, gap = span * 0.008, room = span - gap * (count - 1);
+    let total = 0; for (let i = 0; i < count; i++) total += weights[i];
+    const pulse = s.pulse(t);
+    follow.update(s.bands, count, dt);
+    ctx.save(); ctx.beginPath(); ctx.rect(left, top, span, height); ctx.clip();
+    let x = left;
+    for (let i = 0; i < count; i++) {
+      const level = follow.levels[i], colW = (room * weights[i]) / total, gapV = colW * 0.22;
+      let period = 0; for (const l of lengths[i]) period += l * height + gapV;
+      slide[i] += (i % 2 === 0 ? 1 : -1) * dt * height * (0.02 + 0.9 * level + 1.6 * pulse);
+      const shift = ((slide[i] % period) + period) % period, colour = vMix(p[1], p[3], 0.25 + 0.75 * level);
+      let y = top - shift;
+      for (let k = 0; y < top + height; k++) {
+        const basic = lengths[i][k % PILLS] * height, drawn = Math.max(colW, basic * (0.3 + 0.7 * level));
+        ctx.fillStyle = vCss(k % 2 === 0 ? colour : vMix(colour, p[2], 0.35), 0.5 + 0.5 * level);
+        roundRect(ctx, x, y + (basic - drawn) / 2, colW, drawn, colW / 2); ctx.fill();
+        y += basic + gapV;
+      }
+      x += colW + gap;
+    }
+    ctx.restore();
+  };
+}
+
+/**
+ * Retrowave: a flight down a valley of glowing grid towards a setting sun, between low-poly mountains with gold edges.
+ * Each new row of land is made at the horizon from the music at that moment: bass raises the slopes nearest the valley,
+ * treble the far ridges.
+ */
+function retrowavePainter() {
+  const VALLEY = 8, RIDGE = 18, ACROSS = VALLEY + RIDGE, COLUMNS = ACROSS * 2 + 1, ROWS = 40, KEEP = 56;
+  const EYE = 2.6, NEAREST = 2.2, FAR = ROWS - 2;
+  const NIGHT = [5, 2, 8], HAZE = [74, 34, 14], GOLD = [238, 196, 72], HAZE_GLOW = [255, 176, 64];
+  const spread = Array.from({ length: ACROSS + 1 }, (_, k) => { const j = Math.max(0, k - VALLEY); return Math.min(k, VALLEY) + 1.6 * j + 0.2 * j * j; });
+  const heights = Array.from({ length: KEEP }, () => new Float32Array(COLUMNS)), rowOf = new Array(KEEP).fill(-Infinity);
+  const screen = Array.from({ length: ROWS + 1 }, () => Array.from({ length: COLUMNS }, () => [0, 0]));
+  const follow = bandFollower(RIDGE);
+  let travel = 0, speed = 2.6, last = -1, level = 0, bass = 0, camera = 0, W = 0, H = 0, horizon = 0, focal = 0;
+
+  const slotOf = (r) => ((r % KEEP) + KEEP) % KEEP;
+  const height = (r, c) => heights[slotOf(r)][c];
+
+  function grow(r) {
+    const slot = slotOf(r);
+    if (rowOf[slot] === r) return;
+    rowOf[slot] = r;
+    const row = heights[slot];
+    for (const side of [-1, 1]) {
+      let before = 0;
+      for (let k = 0; k <= ACROSS; k++) {
+        const c = ACROSS + side * k;
+        if (k <= VALLEY) { row[c] = 0; continue; }
+        const rise = vSmooth(0, 1, (k - VALLEY) / 4), broad = 1 + 0.03 * (spread[k] - VALLEY);
+        const shape = Math.pow(vLayered(r * 0.17 + side * 41, spread[k] * 0.06, 3), 1.8) * 1.9;
+        const music = 0.35 + 1.2 * follow.levels[Math.min(RIDGE - 1, k - VALLEY - 1)] + 0.3 * level;
+        const hgt = 4.2 * rise * broad * shape * music;
+        row[c] = k <= VALLEY + 2 ? Math.max(hgt, before * 0.9) : hgt;
+        before = row[c];
+      }
+    }
+  }
+
+  const project = (out, x, y, z) => { z = Math.max(0.35, z); out[0] = W / 2 + (focal * (x - camera)) / z; out[1] = horizon + (focal * (EYE - y)) / z; };
+
+  function ellipseGlow(ctx, x, y, rx, ry, stops, alpha) {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = "lighter";
+    ctx.translate(x, y); ctx.scale(1, ry / rx);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+    stops.forEach(([at, c]) => g.addColorStop(at, c));
+    ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2);
+    ctx.restore();
+  }
+
+  function sky(ctx, t, pulse) {
+    const g = ctx.createLinearGradient(0, 0, 0, horizon);
+    g.addColorStop(0, "rgb(10,4,16)"); g.addColorStop(0.45, "rgb(40,9,44)"); g.addColorStop(0.8, "rgb(104,14,44)"); g.addColorStop(1, "rgb(170,30,40)");
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, horizon + 1);
+    for (let i = 0; i < 90; i++) {
+      const x = vHash(i, 1) * W, y = vHash(i, 2) * vHash(i, 3) * horizon * 0.85;
+      const twinkle = 0.55 + 0.45 * Math.sin(t * (0.8 + 1.7 * vHash(i, 4)) + i);
+      ctx.fillStyle = `rgba(255,236,220,${(200 * twinkle * (1 - (y / horizon) * 0.6)) / 255})`;
+      ctx.beginPath(); ctx.arc(x, y, 0.6 + 1.2 * vHash(i, 5), 0, Math.PI * 2); ctx.fill();
+    }
+    const radius = Math.min(W * 0.2, H * 0.36), sx = W / 2 - camera * 6, sy = horizon - radius * 0.58;
+    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, horizon); ctx.clip();
+    ellipseGlow(ctx, sx, sy, radius * 2.4, radius * 2.4, [[0, "rgba(255,90,40,1)"], [0.45, "rgba(230,40,50,.43)"], [1, "rgba(160,20,60,0)"]], Math.min(1, 0.4 + 0.35 * bass + 0.15 * pulse));
+    ctx.restore();
+    const disc = ctx.createLinearGradient(0, sy - radius, 0, sy + radius);
+    disc.addColorStop(0, "rgb(232,44,36)"); disc.addColorStop(0.5, "rgb(255,104,22)"); disc.addColorStop(0.85, "rgb(255,182,30)"); disc.addColorStop(1, "rgb(255,214,70)");
+    ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(sx, sy, radius, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = vCss(NIGHT); ctx.fillRect(0, horizon, W, H - horizon);
+    ctx.save(); ctx.beginPath(); ctx.rect(0, horizon - H * 0.05, W, H * 0.085); ctx.clip();
+    ellipseGlow(ctx, sx, horizon, W * 0.7, H * 0.05, [[0, "rgba(255,200,90,1)"], [0.4, "rgba(255,140,40,.59)"], [1, "rgba(200,60,30,0)"]], 0.75 + 0.25 * pulse);
+    ctx.restore();
+  }
+
+  function seen(i, side, from, to) {
+    let top = Infinity;
+    for (let k = from; k <= to; k++) top = Math.min(top, screen[i][ACROSS + side * k][1], screen[i + 1][ACROSS + side * k][1]);
+    const lo = screen[i][ACROSS + side * from][0], hi = screen[i][ACROSS + side * to][0];
+    return top < H && Math.max(lo, hi) > -W * 0.1 && Math.min(lo, hi) < W * 1.1;
+  }
+
+  function sideOf(ctx, r, i, side, face, line, width) {
+    const runs = [];
+    let start = VALLEY, rising = true;
+    for (let k = VALLEY; k < ACROSS; k++) {
+      const here = height(r, ACROSS + side * k) + height(r + 1, ACROSS + side * k);
+      const next = height(r, ACROSS + side * (k + 1)) + height(r + 1, ACROSS + side * (k + 1));
+      const up = next >= here;
+      if (k === start) rising = up;
+      else if (up !== rising) { runs.push([start, k, rising]); start = k; rising = up; }
+    }
+    runs.push([start, ACROSS, rising]);
+    for (let n = runs.length - 1; n >= 0; n--) {
+      const [from, to, up] = runs[n];
+      if (!up && Math.min(height(r, ACROSS + side * from), height(r + 1, ACROSS + side * from)) > EYE + 0.3) continue;
+      if (!seen(i, side, from, to)) continue;
+      const faces = new Path2D(), edges = new Path2D();
+      for (let k = to - 1; k >= from; k--) {
+        const inner = ACROSS + side * k, outer = ACROSS + side * (k + 1);
+        const a = screen[i][inner], b = screen[i][outer], c = screen[i + 1][outer], d = screen[i + 1][inner];
+        faces.moveTo(a[0], a[1]); faces.lineTo(b[0], b[1]); faces.lineTo(c[0], c[1]); faces.lineTo(d[0], d[1]); faces.closePath();
+        edges.moveTo(a[0], a[1]); edges.lineTo(b[0], b[1]);
+        edges.moveTo(d[0], d[1]); edges.lineTo(c[0], c[1]);
+        edges.moveTo(b[0], b[1]); edges.lineTo(c[0], c[1]);
+        edges.moveTo(a[0], a[1]); edges.lineTo(c[0], c[1]);
+        if (k === from) { edges.moveTo(a[0], a[1]); edges.lineTo(d[0], d[1]); }
+      }
+      ctx.fillStyle = face; ctx.fill(faces);
+      ctx.strokeStyle = line; ctx.lineWidth = width; ctx.stroke(edges);
+    }
+  }
+
+  function floor(ctx, i, line, width, pulse) {
+    const grid = new Path2D();
+    const a = screen[i][ACROSS - VALLEY], b = screen[i][ACROSS + VALLEY];
+    grid.moveTo(a[0], a[1]); grid.lineTo(b[0], b[1]);
+    for (let c = ACROSS - VALLEY; c <= ACROSS + VALLEY; c++) { grid.moveTo(screen[i][c][0], screen[i][c][1]); grid.lineTo(screen[i + 1][c][0], screen[i + 1][c][1]); }
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    ctx.strokeStyle = vCss(line, (40 + 50 * pulse) / 255); ctx.lineWidth = width * 4; ctx.stroke(grid);
+    ctx.restore();
+    ctx.strokeStyle = vCss(line); ctx.lineWidth = width; ctx.stroke(grid);
+  }
+
+  return (ctx, s, p, t, w, h) => {
+    const dt = last < 0 ? 1 / 60 : Math.min(0.1, Math.max(0.001, t - last)); last = t;
+    follow.update(s.bands, RIDGE, dt);
+    level += (Math.min(1, s.level * 3) - level) * (1 - Math.exp(-dt / 0.6));
+    bass += (s.bass - bass) * (1 - Math.exp(-dt / (s.bass > bass ? 0.05 : 0.3)));
+    speed += ((s.bpm / 60) * 1.4 + 1.2 * level - speed) * (1 - Math.exp(-dt / 1.5));
+    travel += speed * dt;
+    W = w; H = h; horizon = h * 0.5; focal = ((h - horizon) * NEAREST) / EYE;
+    camera = 0.55 * Math.sin(t * 0.11) + 0.25 * Math.sin(t * 0.27 + 1.3);
+    const pulse = s.pulse(t), first = Math.floor(travel + NEAREST - 1.2);
+    for (let r = first; r <= first + ROWS; r++) grow(r);
+    sky(ctx, t, pulse);
+
+    const offset = travel - first;
+    for (let i = 0; i <= ROWS; i++) {
+      const r = first + i, z = i - offset;
+      for (let c = 0; c < COLUMNS; c++) {
+        const k = Math.abs(c - ACROSS), side = Math.sign(c - ACROSS);
+        let x = side * spread[k], zz = z;
+        if (k > VALLEY + 1) {
+          x += (vHash(r, c) - 0.5) * 0.5 * (spread[k] - spread[k - 1]);
+          zz += (vHash(r, c + 999) - 0.5) * 0.4;
+        }
+        project(screen[i][c], x, height(r, c), zz);
+      }
+    }
+    for (let i = ROWS - 1; i >= 0; i--) {
+      const z = i - offset + 0.5;
+      if (z < 0.3) continue;
+      const fog = Math.pow(vSmooth(FAR * 0.6, FAR, z), 1.6);
+      const bright = (0.55 + 0.45 * vSmooth(0, FAR * 0.5, z)) * (0.85 + 0.3 * pulse);
+      const line = vMix(vMix(NIGHT, GOLD, Math.min(1, bright)), HAZE_GLOW, fog * 0.85);
+      const width = Math.min(1.5, Math.max(0.7, 3.2 / z)) * Math.max(1, W / 900);
+      const face = vCss(vMix(NIGHT, HAZE, fog)), stroke = vCss(line);
+      for (const side of [-1, 1]) sideOf(ctx, first + i, i, side, face, stroke, width);
+      floor(ctx, i, line, width, pulse);
+    }
+  };
+}
 
 function buildVisualizer() {
-  const LIGHT = [160, 225, 255], MID = [30, 180, 255], DEEP = [15, 115, 185];
-  const rgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
-  const lerp = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const stage = $(".stage"), song = makeSong(), art = $(".stage-art.real-art");
+  const theatre = $(".theatre");
   let mode = "bars";
-  const bpm = 118;
+  let palette = paletteFrom([30, 180, 255]);
+  const glow = () => {
+    const c = mode === "retrowave" ? [255, 92, 30] : mode === "lyrics" ? [135, 50, 255] : palette[2];
+    theatre.style.setProperty("--glow", vCss(c, 0.5));
+  };
+  const usePalette = () => { try { palette = paletteFrom(vividColour(art)); } catch { /* keep the default */ } glow(); };
+  if (art.complete && art.naturalWidth) usePalette(); else art.addEventListener("load", usePalette, { once: true });
 
-  function bands(t) {
-    const beat = (t * bpm) / 60, phase = beat % 1, kick = Math.exp(-phase * 6), hat = Math.exp(-((beat * 2) % 1) * 9);
-    return Array.from({ length: 16 }, (_, b) => {
-      const base = 0.55 + 0.25 * Math.sin(t * (0.7 + b * 0.37) + b * 1.7) + 0.12 * Math.sin(t * (2.3 + b * 0.11) + b);
-      const hit = b < 4 ? kick * (1 - b * 0.18) : b > 10 ? hat * 0.5 : 0.15 * kick;
-      return Math.min(1, Math.max(0.05, base * (b < 4 ? 0.7 : 0.75 - (b - 4) * 0.025) + hit * 0.5));
-    });
-  }
+  const painters = { bars: barsPainter(), halo: haloPainter(), pillars: pillarsPainter(), retrowave: retrowavePainter() };
+  const LENGTH = 202, bar = $(".stage-progress i"), elapsed = $(".stage-time .at"), left = $(".stage-time .left");
+  const clock = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
+  let shown = -1;
 
   const LYRICS = [
     [0.0, "Turn the lights down low"], [3.2, "and let the city hum below"], [6.6, "every street is gold tonight"], [9.8, "we'll keep driving till it's light"],
   ];
 
-  function backdrop(ctx, w, h, t, strength) {
+  function lyricBackdrop(ctx, w, h, t) {
     ctx.fillStyle = "#0d0c10"; ctx.fillRect(0, 0, w, h);
     const blob = (x, y, r, c, a) => {
       const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, rgb(c, a)); g.addColorStop(1, rgb(c, 0));
+      g.addColorStop(0, vCss(c, a)); g.addColorStop(1, vCss(c, 0));
       ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
     };
-    blob(w * (0.3 + 0.08 * Math.sin(t * 0.13)), h * (0.35 + 0.06 * Math.cos(t * 0.11)), w * 0.6, MID, 0.35 * strength);
-    blob(w * (0.78 + 0.06 * Math.cos(t * 0.09)), h * (0.7 + 0.05 * Math.sin(t * 0.15)), w * 0.55, [225, 20, 135], 0.22 * strength);
+    const kick = song.pulse(t);
+    blob(w * (0.3 + 0.08 * Math.sin(t * 0.13)), h * (0.35 + 0.06 * Math.cos(t * 0.11)), w * 0.6, [135, 50, 255], 0.4 + 0.08 * kick);
+    blob(w * (0.78 + 0.06 * Math.cos(t * 0.09)), h * (0.7 + 0.05 * Math.sin(t * 0.15)), w * 0.55, [225, 20, 135], 0.26 + 0.06 * kick);
   }
 
-  const draw = (ctx, w, h, t) => {
-    const e = bands(t);
-    if (mode === "lyrics") { drawLyrics(ctx, w, h, t); return; }
-    ctx.clearRect(0, 0, w, h);
-    const shade = ctx.createLinearGradient(0, 0, 0, h);
-    shade.addColorStop(0, "rgba(10,10,14,.45)"); shade.addColorStop(0.6, "rgba(10,10,14,.6)"); shade.addColorStop(1, "rgba(10,10,14,.92)");
-    ctx.fillStyle = shade; ctx.fillRect(0, 0, w, h);
-    const floor = h - 96;
-    if (mode === "bars") {
-      const n = 12, slot = (w - 48) / n, bw = slot * 0.62, cy = floor * 0.52;
-      for (let i = 0; i < n; i++) {
-        const v = e[Math.floor((i / n) * 14)];
-        const bh = Math.max(bw, v * floor * 0.78);
-        const x = 24 + i * slot + (slot - bw) / 2, drift = Math.sin(t * 0.8 + i * 0.9) * floor * 0.03;
-        const g = ctx.createLinearGradient(0, cy - bh / 2 + drift, 0, cy + bh / 2 + drift);
-        g.addColorStop(0, rgb(LIGHT)); g.addColorStop(1, rgb(DEEP));
-        ctx.fillStyle = g; roundRect(ctx, x, cy - bh / 2 + drift, bw, bh, bw / 2); ctx.fill();
-      }
-    } else if (mode === "pillars") {
-      const n = 14, slot = (w - 48) / n, pw = slot * 0.56, rowsN = 9, gap = 6;
-      const ph = (floor * 0.8 - gap * (rowsN - 1)) / rowsN;
-      const beat = Math.exp(-(((t * bpm) / 60) % 1) * 7);
-      for (let i = 0; i < n; i++) {
-        const v = e[i], lit = Math.round(v * rowsN), jump = beat * (i < 5 ? 14 : 5);
-        for (let k = 0; k < rowsN; k++) {
-          const on = k < lit, y = floor * 0.88 - (k + 1) * ph - k * gap - (on ? jump : 0);
-          ctx.fillStyle = on ? rgb(lerp(DEEP, LIGHT, k / (rowsN - 1))) : "rgba(255,255,255,.06)";
-          roundRect(ctx, 24 + i * slot + (slot - pw) / 2, y, pw, ph, Math.min(pw, ph) / 2); ctx.fill();
-        }
-      }
-    } else {
-      const cell = Math.max(26, w / 18), cols = Math.ceil(w / cell), rowsN = Math.ceil(h / cell);
-      for (let c = 0; c < cols; c++) for (let r = 0; r < rowsN; r++) {
-        const along = (c / cols + r / rowsN * 0.35 - t * 0.12) % 1;
-        const v = e[Math.floor(((along + 1) % 1) * 15)];
-        const s = cell * (0.25 + 0.6 * v), x = c * cell + (cell - s) / 2, y = r * cell + (cell - s) / 2;
-        ctx.fillStyle = rgb(lerp(DEEP, LIGHT, v), 0.25 + 0.75 * v);
-        roundRect(ctx, x, y, s, s, s * 0.28); ctx.fill();
-      }
-    }
-  };
-
   function drawLyrics(ctx, w, h, t) {
-    backdrop(ctx, w, h, t, 1);
+    lyricBackdrop(ctx, w, h, t);
     const cycle = 13.4, local = reduceMotion.matches ? 8.2 : t % cycle;
-    let index = LYRICS.findLastIndex(([at]) => local >= at);
-    const [at, line] = LYRICS[index];
-    const size = Math.max(26, Math.min(w * 0.072, 58));
+    const index = LYRICS.findLastIndex(([at]) => local >= at), [at, line] = LYRICS[index];
+    const size = Math.max(28, Math.min(w * 0.06, 72)), lead = size * 1.08, x0 = Math.max(28, w * 0.07);
     ctx.font = `800 ${size}px ${FONT}`; ctx.textBaseline = "alphabetic";
-    const words = line.split(" "), maxW = w - 56;
-    const lines = [[]]; let width = 0;
+    const words = line.split(" "), maxW = w - x0 * 2, lines = [[]];
+    let width = 0;
     words.forEach((word, i) => {
       const ww = ctx.measureText(word + " ").width;
       if (width + ww > maxW && lines[lines.length - 1].length) { lines.push([]); width = 0; }
       lines[lines.length - 1].push([word, i, width]); width += ww;
     });
-    const step = 2.6 / words.length;
-    const y0 = h * 0.42 - ((lines.length - 1) * size * 1.08) / 2;
+    const step = 2.6 / words.length, y0 = h * 0.42 - ((lines.length - 1) * lead) / 2;
     lines.forEach((ln, li) => ln.forEach(([word, i, x]) => {
       const p = Math.min(1, Math.max(0, (local - at - i * step) / 0.35));
-      ctx.globalAlpha = p;
-      ctx.fillStyle = "#fff";
-      ctx.fillText(word, 28 + x, y0 + li * size * 1.08 + (1 - p) * 10);
+      ctx.globalAlpha = 0.28 + 0.72 * p; ctx.fillStyle = "#fff";
+      ctx.fillText(word, x0 + x, y0 + li * lead + (1 - p) * 8);
     }));
     ctx.globalAlpha = 1;
-    const next = LYRICS[(index + 1) % LYRICS.length][1];
-    ctx.font = `800 ${Math.round(size * 0.42)}px ${FONT}`; ctx.fillStyle = "rgba(255,255,255,.4)";
-    if (local > at + 2.6) ctx.fillText(next, 28, y0 + lines.length * size * 1.08 + size * 0.2);
+    if (local > at + 2.6) {
+      ctx.font = `800 ${Math.round(size * 0.42)}px ${FONT}`; ctx.fillStyle = "rgba(255,255,255,.4)";
+      ctx.fillText(LYRICS[(index + 1) % LYRICS.length][1], x0, y0 + lines.length * lead + size * 0.2);
+    }
   }
 
+  const draw = (ctx, w, h, t) => {
+    const time = reduceMotion.matches ? 6.3 : t;
+    song.update(time);
+    ctx.clearRect(0, 0, w, h);
+    if (mode === "lyrics") drawLyrics(ctx, w, h, time);
+    else {
+      if (mode !== "retrowave") { ctx.fillStyle = "rgba(10,10,14,.55)"; ctx.fillRect(0, 0, w, h); }
+      painters[mode](ctx, song, palette, time, w, h);
+    }
+    const at = (72 + time) % LENGTH;
+    if (Math.floor(at) !== shown) {
+      shown = Math.floor(at);
+      bar.style.transform = `scaleX(${at / LENGTH})`;
+      elapsed.textContent = clock(at); left.textContent = "-" + clock(LENGTH - at);
+    }
+  };
+
   const loop = canvasLoop($("#vis-canvas"), draw);
-  const stage = $(".stage");
   $("#vis-picker").addEventListener("change", (e) => {
     mode = e.target.value;
-    stage.classList.toggle("lyrics", mode === "lyrics");
+    stage.dataset.mode = mode;
+    glow();
     loop.redraw();
   });
 }
@@ -890,6 +1213,27 @@ function watchSections() {
   document.querySelectorAll(".cover").forEach((c) => covers.observe(c));
 }
 
+// Content rises into place the first time it scrolls into view. Items in a row follow one another.
+function reveal() {
+  if (reduceMotion.matches) return;
+  const items = document.querySelectorAll([
+    ".hero-copy > *", ".hero-art", ".section-head", ".two-col > *", ".theatre", ".np-facts > li", ".facts > li",
+    ".three > *", ".day-strip > li", ".cover-grid > li", ".details-grid > *", ".faq-grid > *", ".chooser", ".queue-panel",
+    ".closing .wrap > *",
+  ].join(","));
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add("in");
+    io.unobserve(e.target);
+  }), { rootMargin: "0px 0px -8% 0px" });
+  items.forEach((el) => {
+    const order = [...el.parentElement.children].indexOf(el);
+    el.style.setProperty("--delay", `${Math.min(order, 6) * 70}ms`);
+    el.classList.add("reveal");
+    io.observe(el);
+  });
+}
+
 Promise.all([document.fonts.load("800 16px \"DM Sans\""), document.fonts.load("700 16px \"DM Sans\""), document.fonts.ready]).then(() => {
   setHour(+hourInput.value, true);
   buildStrip();
@@ -902,4 +1246,5 @@ Promise.all([document.fonts.load("800 16px \"DM Sans\""), document.fonts.load("7
   buildTrends();
   buildFeatures();
   watchSections();
+  reveal();
 });

@@ -11,7 +11,7 @@
   <link rel="icon" href="assets/symbol.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="assets/icon.png">
   <link rel="preload" href="assets/DMSans.ttf" as="font" type="font/ttf" crossorigin>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
@@ -203,30 +203,19 @@
 
     <!-- Now Playing -->
     <section class="section" id="now-playing" aria-labelledby="np-title">
-      <div class="wrap two-col">
-        <div>
+      <div class="wrap">
+        <div class="section-head center">
           <p class="eyebrow">Now Playing</p>
           <h2 id="np-title">Something to watch while it plays</h2>
-          <p class="lede">Now Playing fills the window with the artist's backdrop, synced lyrics and a choice of visualizers that move with the music.</p>
-          <ul class="ticks">
-            <li>Lyric videos, with each word arriving as it's sung, in a typeface picked for the song.</li>
-            <li>Ten visualizers, from Bars and Halo to Bloom, Light Wall and Retrowave, plus five MilkDrop presets through projectM.</li>
-            <li>Synced lyrics from LRCLIB or Plex. If they're off, fix them in Lyric Studio by tapping the space bar as each word begins.</li>
-          </ul>
+          <p class="lede">Now Playing fills the window with the artist's backdrop, synced lyrics and visualizers that take their colour from the album cover and move with the beat.</p>
         </div>
-        <div class="stage-wrap">
-          <fieldset class="segmented" id="vis-picker">
-            <legend class="visually-hidden">Visualizer</legend>
-            <label><input type="radio" name="vis" value="bars" checked><span>Bars</span></label>
-            <label><input type="radio" name="vis" value="pillars"><span>Pillars</span></label>
-            <label><input type="radio" name="vis" value="tiles"><span>Tiles</span></label>
-            <label><input type="radio" name="vis" value="lyrics"><span>Lyrics</span></label>
-          </fieldset>
-          <div class="stage">
+        <div class="theatre">
+          <div class="stage" data-mode="bars">
             <img class="stage-backdrop" src="assets/art/backdrop-zara-larsson.jpg" alt="">
-            <canvas id="vis-canvas" aria-hidden="true"></canvas>
+            <canvas id="vis-canvas" role="img" aria-label="A visualizer moving to the music over the artist's photo."></canvas>
+            <div class="stage-scrim" aria-hidden="true"></div>
             <div class="stage-meta real">
-              <img class="stage-art" src="assets/art/album-zara-larsson-so-good.jpg" alt="">
+              <img class="stage-art real-art" src="assets/art/album-zara-larsson-so-good.jpg" alt="">
               <div>
                 <p class="stage-title">Lush Life</p>
                 <p class="stage-artist">Zara Larsson</p>
@@ -239,8 +228,26 @@
                 <p class="stage-artist">Lyrics written for this demo</p>
               </div>
             </div>
+            <div class="stage-time" aria-hidden="true">
+              <span class="at">1:12</span>
+              <span class="stage-progress"><i></i></span>
+              <span class="left">-2:10</span>
+            </div>
           </div>
+          <fieldset class="segmented" id="vis-picker">
+            <legend class="visually-hidden">Visualizer</legend>
+            <label><input type="radio" name="vis" value="bars" checked><span>Bars</span></label>
+            <label><input type="radio" name="vis" value="halo"><span>Halo</span></label>
+            <label><input type="radio" name="vis" value="pillars"><span>Pillars</span></label>
+            <label><input type="radio" name="vis" value="retrowave"><span>Retrowave</span></label>
+            <label><input type="radio" name="vis" value="lyrics"><span>Lyrics</span></label>
+          </fieldset>
         </div>
+        <ul class="np-facts">
+          <li><h3>Lyric videos</h3><p>Each word arrives as it's sung, in a typeface picked for the song.</p></li>
+          <li><h3>Ten visualizers</h3><p>From Bars and Halo to Bloom, Light Wall and Retrowave, plus five MilkDrop presets through projectM.</p></li>
+          <li><h3>Lyric Studio</h3><p>Synced lyrics come from LRCLIB or Plex. If they're off, tap the space bar as each word begins to fix them.</p></li>
+        </ul>
       </div>
     </section>
 
@@ -428,6 +435,6 @@
     </symbol>
   </svg>
 
-  <script src="script.js"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>
