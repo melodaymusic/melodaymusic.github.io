@@ -354,6 +354,10 @@ const QUERIES = {
     songs: [["Holocene", "Bon Iver", "Bon Iver|Bon Iver, Bon Iver"], ["Funeral", "Phoebe Bridgers", "Phoebe Bridgers|Stranger in the Alps (Deluxe Edition)"], ["Karma Police", "Radiohead", "Radiohead|Karma Police"]], next: ["Indie Folk", "Quiet Songs"] },
   "hazy psych grooves": { groups: [["Mood", [["dreamy", .76], ["groovy", .7]]], ["Genre", [["psychedelic", .86], ["indie rock", .58]]], ["Instruments", [["bass guitar", .73], ["synthesizer", .6]]], ["Moments", [["night drive", .55]]]],
     songs: [["Let It Happen", "Tame Impala", "Tame Impala|Currents"], ["Electric Feel", "MGMT", "MGMT|Oracular Spectacular"], ["Mariella", "Khruangbin", "Khruangbin|Texas Moon"]], next: ["Psych Rock", "Late Night Grooves"] },
+  "chill, not sad": { groups: [["Mood", [["chill", .84], ["happy", .58], ["groovy", .55]]], ["Energy", [["calm", .66]]], ["Leaving out", [["sad", 0], ["melancholy", 0]]]],
+    songs: [["Feel Good Inc.", "Gorillaz", "Gorillaz|Demon Days"], ["Dreams", "Fleetwood Mac", "Fleetwood Mac|Rumours"], ["See You Again", "Tyler, The Creator", "Tyler, The Creator|Flower Boy"]], next: ["Feel Good", "Sunny Grooves"] },
+  "3am": { groups: [["Moments", [["late night", .81], ["night drive", .6]]], ["Mood", [["dreamy", .7], ["chill", .66]]], ["Energy", [["calm", .7]]]],
+    songs: [["Teardrop", "Massive Attack", "Massive Attack|Mezzanine"], ["Moonlight", "Kali Uchis", "Kali Uchis|Red Moon In Venus"], ["May Ninth", "Khruangbin", "Khruangbin|A LA SALA"]], next: ["Late Night Grooves", "Dreamy Indie"] },
 };
 const titleCase = (s) => s.replace(/\b\w/g, (c) => c.toUpperCase()).replace(/\bR&b\b/, "R&B");
 let typing = 0;
@@ -363,7 +367,9 @@ function runQuery(q) {
   document.querySelectorAll("#engine-chips .chip").forEach((c) => c.setAttribute("aria-pressed", c.textContent === q));
   const field = $("#engine-query"), hears = $("#engine-hears"), create = $("#engine-create span");
   const data = QUERIES[q];
-  hears.innerHTML = data.groups.map(([g, words]) => `<div class="hear"><span class="g">${g}</span><span class="words">${words.map(([w, c]) =>
+  hears.innerHTML = data.groups.map(([g, words]) => g === "Leaving out"
+    ? `<div class="hear"><span class="g">${g}</span><span class="words muted">${words.map(([w]) => w).join(", ")}</span></div>`
+    : `<div class="hear"><span class="g">${g}</span><span class="words">${words.map(([w, c]) =>
     `<span class="word${c < .5 ? " weak" : ""}">${w}<span class="meter" aria-hidden="true"><i data-w="${Math.round(c * 100)}"></i></span><span class="visually-hidden">${Math.round(c * 100)}%</span></span>`).join("")}</span></div>`).join("") +
     `<div class="hear results"><span class="g">Top matches</span><ol>${data.songs.map(([title, artist, album]) =>
       `<li><img src="${art(album)}" alt="" loading="lazy"><span><b>${title}</b><span>${artist}</span></span></li>`).join("")}</ol></div>` +
@@ -652,180 +658,19 @@ function pillarsPainter() {
   };
 }
 
-/**
- * Retrowave: a flight down a valley of glowing grid towards a setting sun, between low-poly mountains with gold edges.
- * Each new row of land is made at the horizon from the music at that moment: bass raises the slopes nearest the valley,
- * treble the far ridges.
- */
-function retrowavePainter() {
-  const VALLEY = 8, RIDGE = 18, ACROSS = VALLEY + RIDGE, COLUMNS = ACROSS * 2 + 1, ROWS = 40, KEEP = 56;
-  const EYE = 2.6, NEAREST = 2.2, FAR = ROWS - 2;
-  const NIGHT = [5, 2, 8], HAZE = [74, 34, 14], GOLD = [238, 196, 72], HAZE_GLOW = [255, 176, 64];
-  const spread = Array.from({ length: ACROSS + 1 }, (_, k) => { const j = Math.max(0, k - VALLEY); return Math.min(k, VALLEY) + 1.6 * j + 0.2 * j * j; });
-  const heights = Array.from({ length: KEEP }, () => new Float32Array(COLUMNS)), rowOf = new Array(KEEP).fill(-Infinity);
-  const screen = Array.from({ length: ROWS + 1 }, () => Array.from({ length: COLUMNS }, () => [0, 0]));
-  const follow = bandFollower(RIDGE);
-  let travel = 0, speed = 2.6, last = -1, level = 0, bass = 0, camera = 0, W = 0, H = 0, horizon = 0, focal = 0;
-
-  const slotOf = (r) => ((r % KEEP) + KEEP) % KEEP;
-  const height = (r, c) => heights[slotOf(r)][c];
-
-  function grow(r) {
-    const slot = slotOf(r);
-    if (rowOf[slot] === r) return;
-    rowOf[slot] = r;
-    const row = heights[slot];
-    for (const side of [-1, 1]) {
-      let before = 0;
-      for (let k = 0; k <= ACROSS; k++) {
-        const c = ACROSS + side * k;
-        if (k <= VALLEY) { row[c] = 0; continue; }
-        const rise = vSmooth(0, 1, (k - VALLEY) / 4), broad = 1 + 0.03 * (spread[k] - VALLEY);
-        const shape = Math.pow(vLayered(r * 0.17 + side * 41, spread[k] * 0.06, 3), 1.8) * 1.9;
-        const music = 0.35 + 1.2 * follow.levels[Math.min(RIDGE - 1, k - VALLEY - 1)] + 0.3 * level;
-        const hgt = 4.2 * rise * broad * shape * music;
-        row[c] = k <= VALLEY + 2 ? Math.max(hgt, before * 0.9) : hgt;
-        before = row[c];
-      }
-    }
-  }
-
-  const project = (out, x, y, z) => { z = Math.max(0.35, z); out[0] = W / 2 + (focal * (x - camera)) / z; out[1] = horizon + (focal * (EYE - y)) / z; };
-
-  function ellipseGlow(ctx, x, y, rx, ry, stops, alpha) {
-    ctx.save(); ctx.globalAlpha = alpha; ctx.globalCompositeOperation = "lighter";
-    ctx.translate(x, y); ctx.scale(1, ry / rx);
-    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
-    stops.forEach(([at, c]) => g.addColorStop(at, c));
-    ctx.fillStyle = g; ctx.fillRect(-rx, -rx, rx * 2, rx * 2);
-    ctx.restore();
-  }
-
-  function sky(ctx, t, pulse) {
-    const g = ctx.createLinearGradient(0, 0, 0, horizon);
-    g.addColorStop(0, "rgb(10,4,16)"); g.addColorStop(0.45, "rgb(40,9,44)"); g.addColorStop(0.8, "rgb(104,14,44)"); g.addColorStop(1, "rgb(170,30,40)");
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, horizon + 1);
-    for (let i = 0; i < 90; i++) {
-      const x = vHash(i, 1) * W, y = vHash(i, 2) * vHash(i, 3) * horizon * 0.85;
-      const twinkle = 0.55 + 0.45 * Math.sin(t * (0.8 + 1.7 * vHash(i, 4)) + i);
-      ctx.fillStyle = `rgba(255,236,220,${(200 * twinkle * (1 - (y / horizon) * 0.6)) / 255})`;
-      ctx.beginPath(); ctx.arc(x, y, 0.6 + 1.2 * vHash(i, 5), 0, Math.PI * 2); ctx.fill();
-    }
-    const radius = Math.min(W * 0.2, H * 0.36), sx = W / 2 - camera * 6, sy = horizon - radius * 0.58;
-    ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, horizon); ctx.clip();
-    ellipseGlow(ctx, sx, sy, radius * 2.4, radius * 2.4, [[0, "rgba(255,90,40,1)"], [0.45, "rgba(230,40,50,.43)"], [1, "rgba(160,20,60,0)"]], Math.min(1, 0.4 + 0.35 * bass + 0.15 * pulse));
-    ctx.restore();
-    const disc = ctx.createLinearGradient(0, sy - radius, 0, sy + radius);
-    disc.addColorStop(0, "rgb(232,44,36)"); disc.addColorStop(0.5, "rgb(255,104,22)"); disc.addColorStop(0.85, "rgb(255,182,30)"); disc.addColorStop(1, "rgb(255,214,70)");
-    ctx.fillStyle = disc; ctx.beginPath(); ctx.arc(sx, sy, radius, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = vCss(NIGHT); ctx.fillRect(0, horizon, W, H - horizon);
-    ctx.save(); ctx.beginPath(); ctx.rect(0, horizon - H * 0.05, W, H * 0.085); ctx.clip();
-    ellipseGlow(ctx, sx, horizon, W * 0.7, H * 0.05, [[0, "rgba(255,200,90,1)"], [0.4, "rgba(255,140,40,.59)"], [1, "rgba(200,60,30,0)"]], 0.75 + 0.25 * pulse);
-    ctx.restore();
-  }
-
-  function seen(i, side, from, to) {
-    let top = Infinity;
-    for (let k = from; k <= to; k++) top = Math.min(top, screen[i][ACROSS + side * k][1], screen[i + 1][ACROSS + side * k][1]);
-    const lo = screen[i][ACROSS + side * from][0], hi = screen[i][ACROSS + side * to][0];
-    return top < H && Math.max(lo, hi) > -W * 0.1 && Math.min(lo, hi) < W * 1.1;
-  }
-
-  function sideOf(ctx, r, i, side, face, line, width) {
-    const runs = [];
-    let start = VALLEY, rising = true;
-    for (let k = VALLEY; k < ACROSS; k++) {
-      const here = height(r, ACROSS + side * k) + height(r + 1, ACROSS + side * k);
-      const next = height(r, ACROSS + side * (k + 1)) + height(r + 1, ACROSS + side * (k + 1));
-      const up = next >= here;
-      if (k === start) rising = up;
-      else if (up !== rising) { runs.push([start, k, rising]); start = k; rising = up; }
-    }
-    runs.push([start, ACROSS, rising]);
-    for (let n = runs.length - 1; n >= 0; n--) {
-      const [from, to, up] = runs[n];
-      if (!up && Math.min(height(r, ACROSS + side * from), height(r + 1, ACROSS + side * from)) > EYE + 0.3) continue;
-      if (!seen(i, side, from, to)) continue;
-      const faces = new Path2D(), edges = new Path2D();
-      for (let k = to - 1; k >= from; k--) {
-        const inner = ACROSS + side * k, outer = ACROSS + side * (k + 1);
-        const a = screen[i][inner], b = screen[i][outer], c = screen[i + 1][outer], d = screen[i + 1][inner];
-        faces.moveTo(a[0], a[1]); faces.lineTo(b[0], b[1]); faces.lineTo(c[0], c[1]); faces.lineTo(d[0], d[1]); faces.closePath();
-        edges.moveTo(a[0], a[1]); edges.lineTo(b[0], b[1]);
-        edges.moveTo(d[0], d[1]); edges.lineTo(c[0], c[1]);
-        edges.moveTo(b[0], b[1]); edges.lineTo(c[0], c[1]);
-        edges.moveTo(a[0], a[1]); edges.lineTo(c[0], c[1]);
-        if (k === from) { edges.moveTo(a[0], a[1]); edges.lineTo(d[0], d[1]); }
-      }
-      ctx.fillStyle = face; ctx.fill(faces);
-      ctx.strokeStyle = line; ctx.lineWidth = width; ctx.stroke(edges);
-    }
-  }
-
-  function floor(ctx, i, line, width, pulse) {
-    const grid = new Path2D();
-    const a = screen[i][ACROSS - VALLEY], b = screen[i][ACROSS + VALLEY];
-    grid.moveTo(a[0], a[1]); grid.lineTo(b[0], b[1]);
-    for (let c = ACROSS - VALLEY; c <= ACROSS + VALLEY; c++) { grid.moveTo(screen[i][c][0], screen[i][c][1]); grid.lineTo(screen[i + 1][c][0], screen[i + 1][c][1]); }
-    ctx.save(); ctx.globalCompositeOperation = "lighter";
-    ctx.strokeStyle = vCss(line, (40 + 50 * pulse) / 255); ctx.lineWidth = width * 4; ctx.stroke(grid);
-    ctx.restore();
-    ctx.strokeStyle = vCss(line); ctx.lineWidth = width; ctx.stroke(grid);
-  }
-
-  return (ctx, s, p, t, w, h) => {
-    const dt = last < 0 ? 1 / 60 : Math.min(0.1, Math.max(0.001, t - last)); last = t;
-    follow.update(s.bands, RIDGE, dt);
-    level += (Math.min(1, s.level * 3) - level) * (1 - Math.exp(-dt / 0.6));
-    bass += (s.bass - bass) * (1 - Math.exp(-dt / (s.bass > bass ? 0.05 : 0.3)));
-    speed += ((s.bpm / 60) * 1.4 + 1.2 * level - speed) * (1 - Math.exp(-dt / 1.5));
-    travel += speed * dt;
-    W = w; H = h; horizon = h * 0.5; focal = ((h - horizon) * NEAREST) / EYE;
-    camera = 0.55 * Math.sin(t * 0.11) + 0.25 * Math.sin(t * 0.27 + 1.3);
-    const pulse = s.pulse(t), first = Math.floor(travel + NEAREST - 1.2);
-    for (let r = first; r <= first + ROWS; r++) grow(r);
-    sky(ctx, t, pulse);
-
-    const offset = travel - first;
-    for (let i = 0; i <= ROWS; i++) {
-      const r = first + i, z = i - offset;
-      for (let c = 0; c < COLUMNS; c++) {
-        const k = Math.abs(c - ACROSS), side = Math.sign(c - ACROSS);
-        let x = side * spread[k], zz = z;
-        if (k > VALLEY + 1) {
-          x += (vHash(r, c) - 0.5) * 0.5 * (spread[k] - spread[k - 1]);
-          zz += (vHash(r, c + 999) - 0.5) * 0.4;
-        }
-        project(screen[i][c], x, height(r, c), zz);
-      }
-    }
-    for (let i = ROWS - 1; i >= 0; i--) {
-      const z = i - offset + 0.5;
-      if (z < 0.3) continue;
-      const fog = Math.pow(vSmooth(FAR * 0.6, FAR, z), 1.6);
-      const bright = (0.55 + 0.45 * vSmooth(0, FAR * 0.5, z)) * (0.85 + 0.3 * pulse);
-      const line = vMix(vMix(NIGHT, GOLD, Math.min(1, bright)), HAZE_GLOW, fog * 0.85);
-      const width = Math.min(1.5, Math.max(0.7, 3.2 / z)) * Math.max(1, W / 900);
-      const face = vCss(vMix(NIGHT, HAZE, fog)), stroke = vCss(line);
-      for (const side of [-1, 1]) sideOf(ctx, first + i, i, side, face, stroke, width);
-      floor(ctx, i, line, width, pulse);
-    }
-  };
-}
-
 function buildVisualizer() {
   const stage = $(".stage"), song = makeFlow(), art = $(".stage-art.real-art");
   const theatre = $(".theatre");
   let mode = "bars";
   let palette = paletteFrom([30, 180, 255]);
   const glow = () => {
-    const c = mode === "retrowave" ? [255, 92, 30] : mode === "lyrics" ? [135, 50, 255] : palette[2];
+    const c = mode === "lyrics" ? [135, 50, 255] : palette[2];
     theatre.style.setProperty("--glow", vCss(c, 0.5));
   };
   const usePalette = () => { try { palette = paletteFrom(vividColour(art)); } catch { /* keep the default */ } glow(); };
   if (art.complete && art.naturalWidth) usePalette(); else art.addEventListener("load", usePalette, { once: true });
 
-  const painters = { bars: barsPainter(), halo: haloPainter(), pillars: pillarsPainter(), retrowave: retrowavePainter() };
+  const painters = { bars: barsPainter(), halo: haloPainter(), pillars: pillarsPainter() };
   const LENGTH = 202, bar = $(".stage-progress i"), elapsed = $(".stage-time .at"), left = $(".stage-time .left");
   const clock = (sec) => `${Math.floor(sec / 60)}:${String(Math.floor(sec % 60)).padStart(2, "0")}`;
   let shown = -1;
@@ -878,7 +723,7 @@ function buildVisualizer() {
     ctx.clearRect(0, 0, w, h);
     if (mode === "lyrics") drawLyrics(ctx, w, h, time);
     else {
-      if (mode !== "retrowave") { ctx.fillStyle = "rgba(10,10,14,.55)"; ctx.fillRect(0, 0, w, h); }
+      ctx.fillStyle = "rgba(10,10,14,.55)"; ctx.fillRect(0, 0, w, h);
       painters[mode](ctx, song, palette, time, w, h);
     }
     const at = (72 + time) % LENGTH;
@@ -1060,8 +905,10 @@ const FEATURES = [
   ]],
   ["Meloday Engine", [
     "Analyses your songs on your PC, with no cloud service and no Plex Pass needed",
-    "What ME Hears: 112 words for mood, energy, genre, instruments, vocals and moments",
+    "What ME Hears: 187 words for mood, energy, genre, era, instruments, vocals and moments",
     "Sounds Like search, with a Create Playlist button for up to 50 songs",
+    "Search in everyday words and phrases, like “bangers” or “3am”, with “not” and “without”",
+    "Free-text search for sounds Meloday has no word for, read on your PC",
     "Similar songs from any song's menu",
     "A Taste Engine that learns the sound of what you finish and skip",
     "Separate taste for mornings, afternoons, evenings and nights",
@@ -1094,7 +941,7 @@ const FEATURES = [
     "Synced lyrics from LRCLIB or Plex",
     "Lyric Studio for timing lyrics yourself with the space bar",
     "Lyric videos, with each word arriving as it's sung",
-    "Visualizers: Bars, Halo, M-Wave, Sun, Pillars, Tiles, Ribbons, Light Wall, Bloom and Retrowave",
+    "Visualizers: Bars, Halo, Sun, Pillars, Tiles, Light Wall and Bloom",
     "projectM with five MilkDrop presets",
   ]],
   ["Library", [
