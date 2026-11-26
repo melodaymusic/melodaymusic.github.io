@@ -110,6 +110,7 @@ function setHour(hour, first) {
   document.documentElement.style.setProperty("--sky", hex(period.bg));
   document.documentElement.style.setProperty("--sun", hex(period.rings[3]));
   heroCover.setAttribute("aria-label", `Meloday cover for ${period.name}: ${melodayName(period)}`);
+  if (onHeroPeriod && period !== heroPeriod) onHeroPeriod(period);
   if (first) { sunCover(heroCover, period, melodayName(period)); heroPeriod = period; return; }
   if (period === heroPeriod) return;
   heroPeriod = period;
@@ -126,6 +127,153 @@ hourInput.addEventListener("input", () => {
   hourInput.setAttribute("aria-valuetext", `${fmtHour(h)}, ${periodAt(h).name}`);
   setHour(h);
 });
+
+/* ---------- The Home glow, from MelodayHalo.cs ----------
+ * The corona of an eclipse whose disc sits out of sight past the edge of the page, so all that shows is light falling
+ * in slow rays: the sun's core, the cover's middle ring band and its sky. Drawn small and scaled up, at the top of the
+ * page and mirrored at the bottom, in the colours of the hour picked in the hero. */
+
+const HALO = { columns: 160, ramp: 128, angular: 28, radial: 1.1, flares: .6, still: 40 };
+
+const toLinear = (c) => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+const toSrgb = (c) => Math.min(1, Math.max(0, c <= .0031308 ? c * 12.92 : 1.055 * c ** (1 / 2.4) - .055));
+const channels = (rgb) => [(rgb >> 16 & 255) / 255, (rgb >> 8 & 255) / 255, (rgb & 255) / 255];
+
+function okLab(rgb) {
+  const [r, g, b] = channels(rgb).map(toLinear);
+  const l = Math.cbrt(.4122214708 * r + .5363325363 * g + .0514459929 * b);
+  const m = Math.cbrt(.2119034982 * r + .6806995451 * g + .1073969566 * b);
+  const s = Math.cbrt(.0883024619 * r + .2817188376 * g + .6299787005 * b);
+  return [.2104542553 * l + .793617785 * m - .0040720468 * s, 1.9779984951 * l - 2.428592205 * m + .4505937099 * s, .0259040371 * l + .7827717662 * m - .808675766 * s];
+}
+
+function fromLab([L, A, B]) {
+  const l = (L + .3963377774 * A + .2158037573 * B) ** 3, m = (L - .1055613458 * A - .0638541728 * B) ** 3, s = (L - .0894841775 * A - 1.291485548 * B) ** 3;
+  return [toSrgb(4.0767416621 * l - 3.3077115913 * m + .2309699292 * s), toSrgb(-1.2684380046 * l + 2.6097574011 * m - .3413193965 * s), toSrgb(-.0004196086 * l - .2034181869 * m + 1.2076147365 * s)];
+}
+
+// The cover's rings are see-through and stacked, so a zone's colour is every ring over it laid on the sky in turn.
+function haloColours(period) {
+  const zone = (through) => period.rings.slice(0, through + 1).reduce((under, ring, i) => mixRgb(under, ring, period.opacity[i]), period.bg);
+  return [zone(3), zone(1), period.bg];
+}
+
+function haloRamp(period) {
+  const stops = haloColours(period).map(okLab), ramp = new Float32Array(HALO.ramp * 3);
+  for (let i = 0; i < HALO.ramp; i++) {
+    const at = i / (HALO.ramp - 1) * 2, k = Math.min(at | 0, 1), f = at - k;
+    ramp.set(fromLab(stops[k].map((v, j) => v + (stops[k + 1][j] - v) * f)), i * 3);
+  }
+  return { ramp, sky: channels(period.bg) };
+}
+
+function haloHash(x, y, salt) {
+  let h = (Math.imul(x, 374761393) + Math.imul(y, 668265263) + Math.imul(salt, 1442695041)) >>> 0;
+  h = Math.imul(h ^ (h >>> 13), 1274126177) >>> 0;
+  h ^= h >>> 16;
+  return (h & 0xFFFFFF) / 0x1000000;
+}
+
+function haloNoise(x, y, period) {
+  const x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0;
+  const ix = ((x0 % period) + period) % period, ix1 = (ix + 1) % period;
+  const u = fx * fx * (3 - 2 * fx), w = fy * fy * (3 - 2 * fy);
+  const top = haloHash(ix, y0, period) + (haloHash(ix1, y0, period) - haloHash(ix, y0, period)) * u;
+  const bottom = haloHash(ix, y0 + 1, period) + (haloHash(ix1, y0 + 1, period) - haloHash(ix, y0 + 1, period)) * u;
+  return (top + (bottom - top) * w) * 2 - 1;
+}
+
+const smoothstep = (a, b, x) => { const f = Math.min(1, Math.max(0, (x - a) / (b - a))); return f * f * (3 - 2 * f); };
+
+// Fills straight-alpha RGBA bytes. `mix` blends towards a second palette while the hour changes.
+function renderHalo(pixels, columns, rows, aspect, seconds, from, to, mix) {
+  const radius = Math.max(.8 * aspect, 1.2), cx = aspect / 2, cy = -radius - .06;
+  const t = seconds % 100000, flow = t * .028, spin = t * Math.PI * 2 / 95;
+  const sway = .35 * Math.sin(t * Math.PI * 2 / 71), lightX = Math.sin(sway), lightY = Math.cos(sway);
+  const reach = .24 * (1 + .08 * Math.sin(t * Math.PI * 2 / 11.5));
+  const { angular, radial, flares } = HALO;
+  const ramp = mix <= 0 ? from.ramp : mix >= 1 ? to.ramp : from.ramp.map((v, j) => v + (to.ramp[j] - v) * mix);
+  const sky = from.sky.map((v, j) => v + (to.sky[j] - v) * mix);
+  for (let row = 0; row < rows; row++) {
+    const py = (row + .5) / rows, fade = 1 - smoothstep(.2, .95, py), wash = .45 * (1 - py) ** 1.6;
+    for (let col = 0; col < columns; col++) {
+      const i = (row * columns + col) * 4;
+      if (fade <= 0) { pixels[i + 3] = 0; continue; }
+      const dx = (col + .5) / columns * aspect - cx, dy = py - cy;
+      const r = Math.hypot(dx, dy), theta = Math.atan2(dy, dx), outside = Math.max(r - radius, 0);
+      const u = (theta / (Math.PI * 2) + .5) * angular, v = Math.log(r / radius) * radial - flow;
+      const fl = haloNoise(u, v, angular) + .5 * haloNoise(u * 2, v * 2 + 7.3, angular * 2);
+      const len = reach * Math.max(1 + 1.5 * flares * fl, .15);
+      const radiance = Math.exp(-outside / len) + .2 * Math.exp(-outside / (3.5 * len));
+      const facing = .5 + .5 * (dx * lightX + dy * lightY) / r, arc = .65 + .35 * facing ** 3;
+      const turn = .5 + .5 * Math.cos(theta - Math.PI / 2 - spin + .5 * flares * fl);
+      const s = Math.min(1, Math.max(0, .4 * (1 - turn) + .6 * (1 - Math.exp(-outside * 2.5))));
+      const k = ((s * (HALO.ramp - 1)) | 0) * 3;
+      const cr = ramp[k], cg = ramp[k + 1], cb = ramp[k + 2];
+      const lum = .2126 * cr + .7152 * cg + .0722 * cb, dark = 1 - lum;
+      const light = radiance * arc / (1 + .5 * lum * lum) * (1 + 2 * dark ** 3) * 1.5;
+      const wet = wash * (1 - Math.min(light, 1));
+      const rr = cr * light + sky[0] * wet, gg = cg * light + sky[1] * wet, bb = cb * light + sky[2] * wet;
+      const peak = Math.max(rr, gg, bb, 1e-6);
+      // Past full brightness the colour scales down as a whole rather than clipping, so a yellow sun stays yellow.
+      pixels[i] = rr / peak * 255; pixels[i + 1] = gg / peak * 255; pixels[i + 2] = bb / peak * 255;
+      pixels[i + 3] = Math.min(peak, 1) * fade * 255;
+    }
+  }
+}
+
+let onHeroPeriod = null;
+
+function buildHalo(start) {
+  const layers = [...document.querySelectorAll(".halo")].map((canvas, n) => ({ canvas, ctx: canvas.getContext("2d"), offset: n * 37, seen: false, image: null }));
+  let from = haloRamp(start), to = from, changedAt = -10;
+  const clock = performance.now();
+  const seconds = () => (performance.now() - clock) / 1000;
+  const draw = (layer) => {
+    const { canvas, ctx } = layer;
+    const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
+    const rows = Math.max(16, Math.min(160, Math.round(HALO.columns / aspect)));
+    if (canvas.width !== HALO.columns || canvas.height !== rows) { canvas.width = HALO.columns; canvas.height = rows; layer.image = null; }
+    layer.image ??= ctx.createImageData(HALO.columns, rows);
+    const now = seconds(), mix = smoothstep(0, 1.2, now - changedAt);
+    renderHalo(layer.image.data, HALO.columns, rows, aspect, HALO.still + layer.offset + (reduceMotion.matches ? 0 : now), from, to, mix);
+    ctx.putImageData(layer.image, 0, 0);
+  };
+  onHeroPeriod = (period) => {
+    from = to;
+    to = haloRamp(period);
+    changedAt = seconds();
+    if (reduceMotion.matches) layers.forEach(draw);
+  };
+
+  const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+    const layer = layers.find((l) => l.canvas === e.target);
+    layer.seen = e.isIntersecting;
+    if (layer.seen) draw(layer);
+  }));
+  layers.forEach((l) => io.observe(l.canvas));
+  let last = 0;
+  const tick = (now) => {
+    requestAnimationFrame(tick);
+    if (now - last < 1000 / 30) return;
+    if (reduceMotion.matches && seconds() - changedAt > 1.3) return;
+    last = now;
+    layers.forEach((l) => { if (l.seen) draw(l); });
+  };
+  requestAnimationFrame(tick);
+  addEventListener("resize", () => layers.forEach((l) => { if (l.seen) draw(l); }));
+
+  // Like the app's Home glow, the top one drifts up a little slower than the page.
+  const top = layers[0]?.canvas;
+  if (top) {
+    let queued = false;
+    addEventListener("scroll", () => {
+      if (queued || reduceMotion.matches) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; top.style.transform = `translateY(${Math.min(scrollY, innerHeight * 1.2) * .3}px)`; });
+    }, { passive: true });
+  }
+}
 
 /* ---------- Day strip ---------- */
 
@@ -1029,6 +1177,7 @@ function reveal() {
 
 Promise.all([document.fonts.load("800 16px \"DM Sans\""), document.fonts.load("700 16px \"DM Sans\""), document.fonts.ready]).then(() => {
   setHour(+hourInput.value, true);
+  buildHalo(heroPeriod);
   buildStrip();
   buildMixes();
   buildGuide();
